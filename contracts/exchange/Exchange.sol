@@ -179,7 +179,7 @@ contract Exchange {
         );
 
         int256 referrerBonusRate = perpetual.getGovernance().referrerBonusRate;
-        int256 referreeFeeDiscount = perpetual.getGovernance().referreeFeeDisconut;
+        int256 referreeFeeDiscount = perpetual.getGovernance().referreeFeeDiscount;
 
         int256 takerTradingFee;
         int256 makerTradingFee;

@@ -29,7 +29,7 @@ library LibTypes {
         uint256 lotSize;
         uint256 tradingLotSize;
         int256 referrerBonusRate;
-        int256 referreeFeeDisconut;
+        int256 referreeFeeDiscount;
     }
 
     struct MarginAccount {
@@ -45,8 +45,6 @@ library LibTypes {
     // AMM
     //////////////////////////////////////////////////////////////////////////
     struct AMMGovernanceConfig {
-        uint256 poolFeeRate;
-        uint256 poolDevFeeRate;
         int256 emaAlpha;
         uint256 updatePremiumPrize;
         int256 markPremiumLimit;

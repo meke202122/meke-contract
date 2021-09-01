@@ -95,6 +95,9 @@ const config: HardhatUserConfig = {
     deployer: {
       default: 0,
     },
+    dev: {
+      default: 1,
+    }
   },
   gasReporter: {
     currency: "USD",

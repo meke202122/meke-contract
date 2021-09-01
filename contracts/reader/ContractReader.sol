@@ -11,7 +11,6 @@ contract ContractReader {
         LibTypes.PerpGovernanceConfig perpGovernanceConfig;
         LibTypes.AMMGovernanceConfig ammGovernanceConfig;
         address amm; // AMM contract address
-        address poolAccount; // AMM account address
     }
 
     struct PerpetualStorage {
@@ -35,7 +34,6 @@ contract ContractReader {
         params.perpGovernanceConfig = perpetual.getGovernance();
         params.ammGovernanceConfig = perpetual.amm().getGovernance();
         params.amm = address(perpetual.amm());
-        params.poolAccount = address(perpetual.amm().perpetualProxy());
     }
 
     function getPerpetualStorage(address perpetualAddress) public view returns (PerpetualStorage memory params) {
