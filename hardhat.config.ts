@@ -26,6 +26,8 @@ const chainIds = {
   mainnet: 1,
   rinkeby: 4,
   ropsten: 3,
+  ArbitrumTest: 421611,
+  ArbitrumOne: 42161
 };
 
 const MNEMONIC = process.env.MNEMONIC || "";
@@ -33,18 +35,16 @@ const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "";
 const INFURA_API_KEY = process.env.INFURA_API_KEY || "";
 const ALCHEMY_KEY = process.env.ALCHEMY_KEY || "";
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (args, hre) => {
-  const accounts = await hre.ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(await account.getAddress());
+function createConfig(network: keyof typeof chainIds): NetworkUserConfig {
+  let url: string;
+  if (network === "ArbitrumTest") {
+    url = `https://arb-rinkeby.g.alchemy.com/v2/${ALCHEMY_KEY}`
+  } else if (network === "ArbitrumOne") {
+    url = `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}`
+  } else {
+    url = "https://" + network + ".infura.io/v3/" + INFURA_API_KEY;
   }
-});
 
-function createTestnetConfig(network: keyof typeof chainIds): NetworkUserConfig {
-  const url: string = "https://" + network + ".infura.io/v3/" + INFURA_API_KEY;
   return {
     accounts: {
       count: 10,
@@ -69,11 +69,13 @@ const config: HardhatUserConfig = {
       },
       chainId: chainIds.hardhat,
     },
-    mainnet: createTestnetConfig("mainnet"),
-    goerli: createTestnetConfig("goerli"),
-    kovan: createTestnetConfig("kovan"),
-    rinkeby: createTestnetConfig("rinkeby"),
-    ropsten: createTestnetConfig("ropsten"),
+    mainnet: createConfig("mainnet"),
+    goerli: createConfig("goerli"),
+    kovan: createConfig("kovan"),
+    rinkeby: createConfig("rinkeby"),
+    ropsten: createConfig("ropsten"),
+    ArbitrumTest: createConfig("ArbitrumTest"),
+    ArbitrumOne: createConfig("ArbitrumOne")
   },
   solidity: {
     compilers: [
