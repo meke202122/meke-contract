@@ -29,6 +29,26 @@ contract ContractReader {
         uint256 oracleTime;
     }
 
+    struct TraderPosition {
+        uint256 marginBalance;
+        uint256 markPrice;
+        uint256 maintenanceMargin;
+        PerpetualStorage perpetualStorage;
+        LibTypes.MarginAccount marginAccount;
+        int256 availableMargin;
+    }
+
+    struct LiquidateTrader {
+        address trader;
+        uint256 positionSize;
+    }
+
+    struct Market {
+        uint256 oraclePrice;
+        uint256 oracleTime;
+        uint256 totalSize;
+    }
+
     function getGovParams(address perpetualAddress) public view returns (GovParams memory params) {
         IPerpetual perpetual = IPerpetual(perpetualAddress);
         params.perpGovernanceConfig = perpetual.getGovernance();
@@ -62,5 +82,41 @@ contract ContractReader {
     {
         IPerpetual perpetual = IPerpetual(perpetualAddress);
         return perpetual.getMarginAccount(trader);
+    }
+    function TraderNeedLiquidate(address perpetualAddress,uint256 start,uint256 end) public returns(LiquidateTrader[100] memory params) {
+        IPerpetual perpetual = IPerpetual(perpetualAddress);
+        uint256 nums = 0;
+        for (uint256 i = start; i < end; i++) {
+            address trader = perpetual.accountList(i);
+            if (perpetual.isSafe(trader)) {
+                params[nums].trader = trader;
+                params[nums].positionSize = perpetual.getMarginAccount(trader).size;
+                nums = nums + 1;
+            }
+        }
+    }
+
+    function getTraderAllPosition(address[] memory perpetualAddresses, address trader) external returns(TraderPosition[50] memory params) {
+        for (uint256 i = 0; i<perpetualAddresses.length; i++) {
+            params[i] = getTraderPosition(perpetualAddresses[i],trader);
+        }
+    }
+
+    function getAllMarket(address[] memory perpetualAddresses) external view returns(Market[100] memory params) {
+        for (uint256 i = 0; i < perpetualAddresses.length; i++) {
+            IPerpetual perpetual = IPerpetual(perpetualAddresses[i]);
+            (params[i].oraclePrice, params[i].oracleTime) = perpetual.amm().indexPrice();
+            params[i].totalSize = perpetual.totalSize(LibTypes.Side.LONG);
+        }
+    }
+
+    function getTraderPosition(address perpetualAddress,address trader) public returns (TraderPosition memory params) {
+        IPerpetual perpetual = IPerpetual(perpetualAddress);
+        params.marginBalance = perpetual.marginBalance(trader);
+        params.markPrice = perpetual.markPrice();
+        params.maintenanceMargin = perpetual.maintenanceMargin(trader);
+        params.perpetualStorage = getPerpetualStorage(perpetualAddress);
+        params.marginAccount = perpetual.getMarginAccount(trader);
+        params.availableMargin = perpetual.availableMargin(trader);
     }
 }

@@ -31,6 +31,10 @@ interface IPerpetual {
 
     function totalSize(LibTypes.Side side) external view returns (uint256);
 
+    function totalAccounts() external view returns (uint256);
+
+    function accountList(uint256 num) external view returns (address);
+
     function markPrice() external returns (uint256);
 
     function socialLossPerContract(LibTypes.Side side) external view returns (int256);
@@ -48,6 +52,8 @@ interface IPerpetual {
     function isIMSafe(address trader) external returns (bool);
 
     function isIMSafeWithPrice(address trader, uint256 currentMarkPrice) external returns (bool);
+
+    function marginBalance(address trader) external returns (uint256);
 
     function tradePosition(
         address taker,
