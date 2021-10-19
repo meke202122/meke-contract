@@ -69,37 +69,37 @@ async function deployment(hre: HardhatRuntimeEnvironment): Promise<void> {
     args: [globalConfig.address, proxy.address, priceFeeder.address]
   })
 
-  // whitelist
-  console.log('whitelist perpetual -> proxy');
-  await execute("GlobalConfig", {
-    from: deployer
-  }, "addComponent", perpetual.address, proxy.address);
+  // // whitelist
+  // console.log('whitelist perpetual -> proxy');
+  // await execute("GlobalConfig", {
+  //   from: deployer
+  // }, "addComponent", perpetual.address, proxy.address);
 
-  console.log('whitelist perpetual -> exchange');
-  await execute("GlobalConfig", {
-    from: deployer
-  }, "addComponent", perpetual.address, exchange.address);
+  // console.log('whitelist perpetual -> exchange');
+  // await execute("GlobalConfig", {
+  //   from: deployer
+  // }, "addComponent", perpetual.address, exchange.address);
 
-  console.log('whitelist funding -> exchange');
-  await execute("GlobalConfig", {
-    from: deployer
-  }, "addComponent", funding.address, exchange.address);
+  // console.log('whitelist funding -> exchange');
+  // await execute("GlobalConfig", {
+  //   from: deployer
+  // }, "addComponent", funding.address, exchange.address);
 
-  await execute("GlobalConfig", {
-    from: deployer
-  }, "addComponent", perpetual.address, contractRreader.address);
+  // await execute("GlobalConfig", {
+  //   from: deployer
+  // }, "addComponent", perpetual.address, contractRreader.address);
 
-  // set perpetual gov param
-  await execute("Perpetual", {
-    from: deployer,
-  }, "setGovernanceAddress", ethers.utils.formatBytes32String("funding"), funding.address)
-  console.log("set funding address done")
+  // // set perpetual gov param
+  // await execute("Perpetual", {
+  //   from: deployer,
+  // }, "setGovernanceAddress", ethers.utils.formatBytes32String("fundingModule"), funding.address)
+  // console.log("set funding address done")
 
-  // init funding
-  await execute("Funding", {
-    from: deployer
-  }, "initFunding")
-  console.log("initFunding done")
+  // // init funding
+  // await execute("Funding", {
+  //   from: deployer
+  // }, "initFunding")
+  // console.log("initFunding done")
 }
 
 deployment.tags = ["ArbTest"]

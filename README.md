@@ -1,4 +1,4 @@
-# Meke Protocol(WIP)
+# Meke Protocol
 
 ## Usage
 

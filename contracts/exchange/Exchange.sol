@@ -83,11 +83,11 @@ contract Exchange {
             bytes32 makerOrderHash = validateOrderParam(perpetual, makerOrderParams[i]);
             uint256 makerFilledAmount = filled[makerOrderHash];
 
-            require(amounts[i] <= takerOrderParam.amount.sub(takerFilledAmount), toAsciiString(takerOrderParam.trader));
-            require(amounts[i] <= makerOrderParams[i].amount.sub(makerFilledAmount), toAsciiString(makerOrderParams[i].trader));
+            require(amounts[i] <= takerOrderParam.amount.sub(takerFilledAmount), "-1:taker overfilled");
+            require(amounts[i] <= makerOrderParams[i].amount.sub(makerFilledAmount),  mergeString(uint2str(i),":maker overfilled"));
             require(amounts[i].mod(tradingLotSize) == 0, "amount must be divisible by tradingLotSize");
 
-            uint256 opened = fillOrder(perpetual, takerOrderParam, makerOrderParams[i], amounts[i]);
+            uint256 opened = fillOrder(i, perpetual, takerOrderParam, makerOrderParams[i], amounts[i]);
 
             takerOpened = takerOpened.add(opened);
             filled[makerOrderHash] = makerFilledAmount.add(amounts[i]);
@@ -98,9 +98,9 @@ contract Exchange {
 
         // all trades done, check taker safe.
         if (takerOpened > 0) {
-            require(perpetual.isIMSafe(takerOrderParam.trader), toAsciiString(takerOrderParam.trader));
+            require(perpetual.isIMSafe(takerOrderParam.trader), "-1:taker initial margin unsafe");
         } else {
-            require(perpetual.isSafe(takerOrderParam.trader), toAsciiString(takerOrderParam.trader));
+            require(perpetual.isSafe(takerOrderParam.trader), "-1:taker unsafe");
         }
         require(perpetual.isSafe(msg.sender), "broker unsafe");
 
@@ -164,6 +164,7 @@ contract Exchange {
      * @return Opened position amount of taker.
      */
     function fillOrder(
+        uint256 index,
         IPerpetual perpetual,
         LibOrder.OrderParam memory takerOrderParam,
         LibOrder.OrderParam memory makerOrderParam,
@@ -217,9 +218,9 @@ contract Exchange {
         claimMakerDevFee(perpetual, makerOrderParam.trader, price, makerOpened, amount.sub(makerOpened));
 
         if (makerOpened > 0) {
-            require(perpetual.isIMSafe(makerOrderParam.trader), toAsciiString(makerOrderParam.trader));
+            require(perpetual.isIMSafe(makerOrderParam.trader), mergeString(uint2str(index),":maker initial margin unsafe"));
         } else {
-            require(perpetual.isSafe(makerOrderParam.trader), toAsciiString(makerOrderParam.trader));
+            require(perpetual.isSafe(makerOrderParam.trader), mergeString(uint2str(index),":maker unsafe"));
         }
 
         emit MatchWithOrders(address(perpetual), takerOrderParam, makerOrderParam, amount);
@@ -388,20 +389,27 @@ contract Exchange {
         int256 rate = perpetual.getGovernance().makerDevFeeRate;
         claimDevFee(perpetual, trader, price, openedAmount, closedAmount, rate);
     }
-    function toAsciiString(address x) internal view returns (string memory) {
-        bytes memory s = new bytes(40);
-        for (uint i = 0; i < 20; i++) {
-            bytes1 b = bytes1(uint8(uint(uint160(x)) / (2**(8*(19 - i)))));
-            bytes1 hi = bytes1(uint8(b) / 16);
-            bytes1 lo = bytes1(uint8(b) - 16 * uint8(hi));
-            s[2*i] = char(hi);
-            s[2*i+1] = char(lo);
-        }
-        return string(s);
+
+    function mergeString(string memory s1,string memory s2) view public returns(string memory) {
+        return string(abi.encodePacked(s1, s2));
     }
 
-    function char(bytes1 b) internal view returns (bytes1 c) {
-        if (uint8(b) < 10) return bytes1(uint8(b) + 0x30);
-        else return bytes1(uint8(b) + 0x57);
+    function uint2str(uint _i) internal pure returns (string memory) {
+        if (_i == 0) {
+            return "0";
+        }
+        uint j = _i;
+        uint len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint k = len - 1;
+        while (_i != 0) {
+            bstr[k--] = byte(uint8(48 + _i % 10));
+            _i /= 10;
+        }
+        return string(bstr);
     }
 }
