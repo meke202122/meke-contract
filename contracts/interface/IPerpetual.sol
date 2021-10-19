@@ -3,7 +3,7 @@
 pragma solidity 0.7.6;
 pragma abicoder v2;
 
-import "../interface/IAMM.sol";
+import "../interface/IFunding.sol";
 
 import "../lib/LibTypes.sol";
 
@@ -27,7 +27,7 @@ interface IPerpetual {
 
     function collateral() external view returns (address);
 
-    function amm() external view returns (IAMM);
+    function fundingModule() external view returns (IFunding);
 
     function totalSize(LibTypes.Side side) external view returns (uint256);
 

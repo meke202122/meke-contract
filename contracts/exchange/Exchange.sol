@@ -7,7 +7,7 @@ import "../lib/LibOrder.sol";
 import "../lib/LibSignature.sol";
 import "../interface/IGlobalConfig.sol";
 import "../interface/IPerpetual.sol";
-import "../interface/IAMM.sol";
+import "../interface/IFunding.sol";
 
 contract Exchange {
     using LibMathSigned for int256;

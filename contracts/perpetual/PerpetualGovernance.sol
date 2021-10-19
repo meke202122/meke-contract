@@ -103,8 +103,8 @@ contract PerpetualGovernance is PerpetualStorage {
         require(value != address(0), "invalid address");
         if (key == "dev") {
             devAddress = value;
-        } else if (key == "amm") {
-            amm = IAMM(value);
+        } else if (key == "fundingModule") {
+            fundingModule = IFunding(value);
         } else if (key == "globalConfig") {
             globalConfig = IGlobalConfig(value);
         } else {

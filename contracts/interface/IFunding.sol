@@ -7,7 +7,7 @@ import "../lib/LibTypes.sol";
 import "../interface/IPerpetual.sol";
 
 
-interface IAMM {
+interface IFunding {
     function indexPrice() external view returns (uint256 price, uint256 timestamp);
 
     function lastFundingState() external view returns (LibTypes.FundingState memory);

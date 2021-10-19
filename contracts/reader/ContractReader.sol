@@ -9,8 +9,8 @@ import "../interface/IPerpetual.sol";
 contract ContractReader {
     struct GovParams {
         LibTypes.PerpGovernanceConfig perpGovernanceConfig;
-        LibTypes.FundingGovernanceConfig ammGovernanceConfig;
-        address amm; // AMM contract address
+        LibTypes.FundingGovernanceConfig fundingModuleGovernanceConfig;
+        address fundingModuleAddress; // funding module contract address
     }
 
     struct PerpetualStorage {
@@ -52,8 +52,8 @@ contract ContractReader {
     function getGovParams(address perpetualAddress) public view returns (GovParams memory params) {
         IPerpetual perpetual = IPerpetual(perpetualAddress);
         params.perpGovernanceConfig = perpetual.getGovernance();
-        params.ammGovernanceConfig = perpetual.amm().getGovernance();
-        params.amm = address(perpetual.amm());
+        params.fundingModuleGovernanceConfig = perpetual.fundingModule().getGovernance();
+        params.fundingModuleAddress = address(perpetual.fundingModule());
     }
 
     function getPerpetualStorage(address perpetualAddress) public view returns (PerpetualStorage memory params) {
@@ -71,8 +71,8 @@ contract ContractReader {
         params.isPaused = perpetual.paused();
         params.isWithdrawDisabled = perpetual.withdrawDisabled();
 
-        params.fundingParams = perpetual.amm().lastFundingState();
-        (params.oraclePrice, params.oracleTime) = perpetual.amm().indexPrice();
+        params.fundingParams = perpetual.fundingModule().lastFundingState();
+        (params.oraclePrice, params.oracleTime) = perpetual.fundingModule().indexPrice();
     }
 
     function getAccountStorage(address perpetualAddress, address trader)
@@ -105,7 +105,7 @@ contract ContractReader {
     function getAllMarket(address[] memory perpetualAddresses) external view returns(Market[100] memory params) {
         for (uint256 i = 0; i < perpetualAddresses.length; i++) {
             IPerpetual perpetual = IPerpetual(perpetualAddresses[i]);
-            (params[i].oraclePrice, params[i].oracleTime) = perpetual.amm().indexPrice();
+            (params[i].oraclePrice, params[i].oracleTime) = perpetual.fundingModule().indexPrice();
             params[i].totalSize = perpetual.totalSize(LibTypes.Side.LONG);
         }
     }

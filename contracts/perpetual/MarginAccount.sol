@@ -44,7 +44,7 @@ contract MarginAccount is Collateral {
             .sub(socialLossPerContract(account.side).wmul(account.size.toInt256()));
         int256 tmp = account.entryValue.toInt256()
             .sub(account.entryFundingLoss)
-            .add(amm.currentAccumulatedFundingPerContract().wmul(account.size.toInt256()))
+            .add(fundingModule.currentAccumulatedFundingPerContract().wmul(account.size.toInt256()))
             .sub(account.size.wmul(liquidationPrice).toInt256());
         if (account.side == LibTypes.Side.LONG) {
             liquidationAmount = liquidationAmount.sub(tmp);
@@ -204,7 +204,7 @@ contract MarginAccount is Collateral {
         if (amount == 0) {
             return 0;
         }
-        int256 loss = amm.currentAccumulatedFundingPerContract().wmul(amount.toInt256());
+        int256 loss = fundingModule.currentAccumulatedFundingPerContract().wmul(amount.toInt256());
         if (amount == account.size) {
             loss = loss.sub(account.entryFundingLoss);
         } else {
@@ -235,7 +235,7 @@ contract MarginAccount is Collateral {
         account.cashBalance = account.cashBalance.add(rpnl);
         account.entryValue = markPrice.wmul(account.size);
         account.entrySocialLoss = socialLossPerContract(account.side).wmul(account.size.toInt256());
-        account.entryFundingLoss = amm.currentAccumulatedFundingPerContract().wmul(account.size.toInt256());
+        account.entryFundingLoss = fundingModule.currentAccumulatedFundingPerContract().wmul(account.size.toInt256());
         emit UpdatePositionAccount(trader, account, totalSize(account.side), markPrice);
     }
 
@@ -256,7 +256,7 @@ contract MarginAccount is Collateral {
         account.entryValue = account.entryValue.add(price.wmul(amount));
         account.entrySocialLoss = account.entrySocialLoss.add(socialLossPerContract(side).wmul(amount.toInt256()));
         account.entryFundingLoss = account.entryFundingLoss.add(
-            amm.currentAccumulatedFundingPerContract().wmul(amount.toInt256())
+            fundingModule.currentAccumulatedFundingPerContract().wmul(amount.toInt256())
         );
         increaseTotalSize(side, amount);
     }

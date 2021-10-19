@@ -140,14 +140,11 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
     /**
      * @notice Set perpetual status to 'settled'. It can be call only once in 'emergency' mode.
      *         In settled mode, user is expected to closed positions and withdraw all the collateral.
-     * @notice endGlobalSettlement will also settle all postition belongs to amm.
      */
     function endGlobalSettlement() external onlyOwner {
         require(status == LibTypes.Status.EMERGENCY, "wrong perpetual status");
         status = LibTypes.Status.SETTLED;
 
-        address ammTrader = address(amm.perpetualProxy());
-        settleImplementation(ammTrader);
         emit EnterSettledStatus(settlementPrice);
     }
 
@@ -263,15 +260,13 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
     // Method for public properties
     /**
      * @notice Price to calculate all price-depended properties of margin account.
-     *         The price is read from amm in normal status, and will replaced by settlement price
-     *         in emergency and settled status.
      *
      * @dev decimals == 18
      *
      * @return Mark price.
      */
     function markPrice() public returns (uint256) {
-        return status == LibTypes.Status.NORMAL ? amm.currentMarkPrice() : settlementPrice;
+        return status == LibTypes.Status.NORMAL ? fundingModule.currentMarkPrice() : settlementPrice;
     }
 
     /**
@@ -540,6 +535,6 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
     }
 
     function setFairPrice(uint256 price) public onlyAuthorized  {
-        amm.setFairPrice(price);
+        fundingModule.setFairPrice(price);
     }
 }

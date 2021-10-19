@@ -2,8 +2,8 @@
 
 pragma solidity 0.7.6;
 
-interface IAMMGetter {
-    function amm() external view returns (address);
+interface IFundingGetter {
+    function fundingModule() external view returns (address);
 }
 
 contract Proxy {
@@ -11,7 +11,7 @@ contract Proxy {
     bytes32 internal constant IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
 
     modifier authorizedOnly() {
-        require(msg.sender == IAMMGetter(implementation()).amm(), "unauthorized caller");
+        require(msg.sender == IFundingGetter(implementation()).fundingModule(), "unauthorized caller");
         _;
     }
 

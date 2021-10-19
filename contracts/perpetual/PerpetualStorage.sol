@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../lib/LibMath.sol";
 import "../lib/LibTypes.sol";
 
-import "../interface/IAMM.sol";
+import "../interface/IFunding.sol";
 import "../interface/IGlobalConfig.sol";
 
 
@@ -21,8 +21,8 @@ contract PerpetualStorage {
 
     // Global configuation instance address
     IGlobalConfig public globalConfig;
-    // AMM address
-    IAMM public amm;
+    // funding module address
+    IFunding public fundingModule;
     // Address of collateral;
     IERC20 public collateral;
     // DEV address
