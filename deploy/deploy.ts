@@ -62,8 +62,8 @@ async function deployment(hre: HardhatRuntimeEnvironment): Promise<void> {
     args: [perpetual.address]
   })
 
-  // AMM
-  let amm = await deploy("AMM", {
+  // Funding
+  let funding = await deploy("Funding", {
     from: deployer,
     log: true,
     args: [globalConfig.address, proxy.address, priceFeeder.address]
@@ -80,10 +80,10 @@ async function deployment(hre: HardhatRuntimeEnvironment): Promise<void> {
     from: deployer
   }, "addComponent", perpetual.address, exchange.address);
 
-  console.log('whitelist amm -> exchange');
+  console.log('whitelist funding -> exchange');
   await execute("GlobalConfig", {
     from: deployer
-  }, "addComponent", amm.address, exchange.address);
+  }, "addComponent", funding.address, exchange.address);
 
   await execute("GlobalConfig", {
     from: deployer
@@ -92,11 +92,11 @@ async function deployment(hre: HardhatRuntimeEnvironment): Promise<void> {
   // set perpetual gov param
   await execute("Perpetual", {
     from: deployer,
-  }, "setGovernanceAddress", ethers.utils.formatBytes32String("amm"), amm.address)
-  console.log("set amm address done")
+  }, "setGovernanceAddress", ethers.utils.formatBytes32String("funding"), funding.address)
+  console.log("set funding address done")
 
   // init funding
-  await execute("AMM", {
+  await execute("Funding", {
     from: deployer
   }, "initFunding")
   console.log("initFunding done")

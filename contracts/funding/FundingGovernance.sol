@@ -12,11 +12,11 @@ import "../interface/IPriceFeeder.sol";
 import "../interface/IPerpetual.sol";
 
 
-contract AMMGovernance {
+contract FundingGovernance {
     using LibMathSigned for int256;
     using LibMathUnsigned for uint256;
 
-    LibTypes.AMMGovernanceConfig internal governance;
+    LibTypes.FundingGovernanceConfig internal governance;
     LibTypes.FundingState internal fundingState;
 
     // auto-set when calling setGovernanceParameter
@@ -76,7 +76,7 @@ contract AMMGovernance {
     }
 
     // get governance data structure.
-    function getGovernance() public view returns (LibTypes.AMMGovernanceConfig memory) {
+    function getGovernance() public view returns (LibTypes.FundingGovernanceConfig memory) {
         return governance;
     }
 }

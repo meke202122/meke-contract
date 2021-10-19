@@ -18,7 +18,7 @@ interface IAMM {
 
     function lastFundingRate() external view returns (int256);
 
-    function getGovernance() external view returns (LibTypes.AMMGovernanceConfig memory);
+    function getGovernance() external view returns (LibTypes.FundingGovernanceConfig memory);
 
     function perpetualProxy() external view returns (IPerpetual);
 

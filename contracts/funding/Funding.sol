@@ -8,10 +8,10 @@ import {LibMathSigned, LibMathUnsigned} from "../lib/LibMath.sol";
 import "../lib/LibTypes.sol";
 import "../interface/IPriceFeeder.sol";
 import "../interface/IPerpetual.sol";
-import "./AMMGovernance.sol";
+import "./FundingGovernance.sol";
 
 
-contract AMM is AMMGovernance {
+contract Funding is FundingGovernance {
     using LibMathSigned for int256;
     using LibMathUnsigned for uint256;
 
@@ -24,7 +24,7 @@ contract AMM is AMMGovernance {
         address _globalConfig,
         address _perpetualProxy,
         address _priceFeeder
-    ) AMMGovernance(_globalConfig)
+    ) FundingGovernance(_globalConfig)
     {
         priceFeeder = IPriceFeeder(_priceFeeder);
         perpetualProxy = IPerpetual(_perpetualProxy);

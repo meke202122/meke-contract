@@ -22,7 +22,7 @@ contract Exchange {
     IGlobalConfig public globalConfig;
 
     // referrals
-    mapping(address => address) private referrals;
+    mapping(address => address) public referrals;
 
     // order status
     mapping(bytes32 => uint256) public filled;
@@ -36,6 +36,7 @@ contract Exchange {
     );
     event Cancel(bytes32 indexed orderHash);
     event ActivateReferral(address indexed referrer, address indexed referree);
+    event ClaimReferralBonus(address indexed referrer,uint256,int256);
 
     constructor(address _globalConfig) {
         globalConfig = IGlobalConfig(_globalConfig);
@@ -82,25 +83,24 @@ contract Exchange {
             bytes32 makerOrderHash = validateOrderParam(perpetual, makerOrderParams[i]);
             uint256 makerFilledAmount = filled[makerOrderHash];
 
-            require(amounts[i] <= takerOrderParam.amount.sub(takerFilledAmount), "taker overfilled");
-            require(amounts[i] <= makerOrderParams[i].amount.sub(makerFilledAmount), "maker overfilled");
+            require(amounts[i] <= takerOrderParam.amount.sub(takerFilledAmount), toAsciiString(takerOrderParam.trader));
+            require(amounts[i] <= makerOrderParams[i].amount.sub(makerFilledAmount), toAsciiString(makerOrderParams[i].trader));
             require(amounts[i].mod(tradingLotSize) == 0, "amount must be divisible by tradingLotSize");
 
             uint256 opened = fillOrder(perpetual, takerOrderParam, makerOrderParams[i], amounts[i]);
-
-            // update fair price
-            perpetual.setFairPrice(makerOrderParams[i].getPrice());
 
             takerOpened = takerOpened.add(opened);
             filled[makerOrderHash] = makerFilledAmount.add(amounts[i]);
             takerFilledAmount = takerFilledAmount.add(amounts[i]);
         }
+        // update fair price
+        perpetual.setFairPrice(makerOrderParams[makerOrderParams.length-1].getPrice());
 
         // all trades done, check taker safe.
         if (takerOpened > 0) {
-            require(perpetual.isIMSafe(takerOrderParam.trader), "taker initial margin unsafe");
+            require(perpetual.isIMSafe(takerOrderParam.trader), toAsciiString(takerOrderParam.trader));
         } else {
-            require(perpetual.isSafe(takerOrderParam.trader), "maker unsafe");
+            require(perpetual.isSafe(takerOrderParam.trader), toAsciiString(takerOrderParam.trader));
         }
         require(perpetual.isSafe(msg.sender), "broker unsafe");
 
@@ -190,7 +190,9 @@ contract Exchange {
             takerTradingFee = amount.wmul(price).toInt256().wmul(takerOrderParam.takerFeeRate()).wmul(referreeFeeDiscount);
             claimTradingFee(perpetual, takerOrderParam.trader, takerTradingFee.wmul(LibMathSigned.WAD().sub(referrerBonusRate)));
             // referral bonus
-            claimReferralBonus(perpetual, takerOrderParam.trader, takerTradingFee.wmul(referrerBonusRate));
+            int256 bonus = takerTradingFee.wmul(referrerBonusRate);
+            claimReferralBonus(perpetual, takerOrderParam.trader, bonus);
+            emit ClaimReferralBonus(referrals[takerOrderParam.trader], block.timestamp, bonus);
         } else {
             takerTradingFee = amount.wmul(price).toInt256().wmul(takerOrderParam.takerFeeRate());
             claimTradingFee(perpetual, takerOrderParam.trader, takerTradingFee);
@@ -202,7 +204,9 @@ contract Exchange {
             makerTradingFee = amount.wmul(price).toInt256().wmul(makerOrderParam.makerFeeRate()).wmul(referreeFeeDiscount);
             claimTradingFee(perpetual, makerOrderParam.trader, makerTradingFee.wmul(LibMathSigned.WAD().sub(referrerBonusRate)));
             // referral bonus
-            claimReferralBonus(perpetual, makerOrderParam.trader, makerTradingFee.wmul(referrerBonusRate));
+            int256 bonus = makerTradingFee.wmul(referrerBonusRate);
+            claimReferralBonus(perpetual, makerOrderParam.trader, bonus);
+            emit ClaimReferralBonus(referrals[makerOrderParam.trader], block.timestamp, bonus);
         } else {
             makerTradingFee = amount.wmul(price).toInt256().wmul(makerOrderParam.makerFeeRate());
             claimTradingFee(perpetual, makerOrderParam.trader, makerTradingFee);
@@ -213,9 +217,9 @@ contract Exchange {
         claimMakerDevFee(perpetual, makerOrderParam.trader, price, makerOpened, amount.sub(makerOpened));
 
         if (makerOpened > 0) {
-            require(perpetual.isIMSafe(makerOrderParam.trader), "maker initial margin unsafe");
+            require(perpetual.isIMSafe(makerOrderParam.trader), toAsciiString(makerOrderParam.trader));
         } else {
-            require(perpetual.isSafe(makerOrderParam.trader), "maker unsafe");
+            require(perpetual.isSafe(makerOrderParam.trader), toAsciiString(makerOrderParam.trader));
         }
 
         emit MatchWithOrders(address(perpetual), takerOrderParam, makerOrderParam, amount);
@@ -383,5 +387,21 @@ contract Exchange {
     {
         int256 rate = perpetual.getGovernance().makerDevFeeRate;
         claimDevFee(perpetual, trader, price, openedAmount, closedAmount, rate);
+    }
+    function toAsciiString(address x) internal view returns (string memory) {
+        bytes memory s = new bytes(40);
+        for (uint i = 0; i < 20; i++) {
+            bytes1 b = bytes1(uint8(uint(uint160(x)) / (2**(8*(19 - i)))));
+            bytes1 hi = bytes1(uint8(b) / 16);
+            bytes1 lo = bytes1(uint8(b) - 16 * uint8(hi));
+            s[2*i] = char(hi);
+            s[2*i+1] = char(lo);
+        }
+        return string(s);
+    }
+
+    function char(bytes1 b) internal view returns (bytes1 c) {
+        if (uint8(b) < 10) return bytes1(uint8(b) + 0x30);
+        else return bytes1(uint8(b) + 0x57);
     }
 }

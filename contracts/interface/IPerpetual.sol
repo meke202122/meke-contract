@@ -53,7 +53,7 @@ interface IPerpetual {
 
     function isIMSafeWithPrice(address trader, uint256 currentMarkPrice) external returns (bool);
 
-    function marginBalance(address trader) external returns (uint256);
+    function marginBalance(address trader) external returns (int256);
 
     function tradePosition(
         address taker,

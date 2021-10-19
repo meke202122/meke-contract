@@ -9,7 +9,7 @@ import "../interface/IPerpetual.sol";
 contract ContractReader {
     struct GovParams {
         LibTypes.PerpGovernanceConfig perpGovernanceConfig;
-        LibTypes.AMMGovernanceConfig ammGovernanceConfig;
+        LibTypes.FundingGovernanceConfig ammGovernanceConfig;
         address amm; // AMM contract address
     }
 
@@ -30,7 +30,7 @@ contract ContractReader {
     }
 
     struct TraderPosition {
-        uint256 marginBalance;
+        int256 marginBalance;
         uint256 markPrice;
         uint256 maintenanceMargin;
         PerpetualStorage perpetualStorage;

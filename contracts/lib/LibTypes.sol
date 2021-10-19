@@ -42,9 +42,9 @@ library LibTypes {
     }
 
     //////////////////////////////////////////////////////////////////////////
-    // AMM
+    // Funding module
     //////////////////////////////////////////////////////////////////////////
-    struct AMMGovernanceConfig {
+    struct FundingGovernanceConfig {
         int256 emaAlpha;
         uint256 updatePremiumPrize;
         int256 markPremiumLimit;

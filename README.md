@@ -26,10 +26,14 @@ Run the Mocha tests:
 $ yarn test
 ```
 
+### setup deploy env
+
+refer to `.env.example`
+
 ### Deploy contract to netowrk (requires Mnemonic and infura API key)
 
 ```
-npx hardhat deploy --tags ArbTest --network rinkeby
+npx hardhat deploy --tags ArbTest --network ArbitrumTest
 ```
 
 ### Validate a contract with etherscan (requires API ke)
