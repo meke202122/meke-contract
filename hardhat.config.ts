@@ -41,8 +41,10 @@ function createConfig(network: keyof typeof chainIds): NetworkUserConfig {
     url = `https://arb-rinkeby.g.alchemy.com/v2/${ALCHEMY_KEY}`
   } else if (network === "ArbitrumOne") {
     url = `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}`
+  } else if (network === "ganache") {
+    url = `http://127.0.0.1:8545`
   } else {
-    url = "https://" + network + ".infura.io/v3/" + INFURA_API_KEY;
+    url = `https://${network}.infura.io/v3/${INFURA_API_KEY}`
   }
 
   return {
@@ -69,6 +71,7 @@ const config: HardhatUserConfig = {
       },
       chainId: chainIds.hardhat,
     },
+    ganache: createConfig("ganache"),
     mainnet: createConfig("mainnet"),
     goerli: createConfig("goerli"),
     kovan: createConfig("kovan"),
