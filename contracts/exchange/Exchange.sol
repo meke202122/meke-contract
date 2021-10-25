@@ -64,7 +64,8 @@ contract Exchange {
         require(perpetual.status() == LibTypes.Status.NORMAL, "wrong perpetual status");
 
         uint256 tradingLotSize = perpetual.getGovernance().tradingLotSize;
-        bytes32 takerOrderHash = validateOrderParam(perpetual, takerOrderParam);
+        // "-1" represent taker
+        bytes32 takerOrderHash = validateOrderParam(perpetual, takerOrderParam, "-1");
         uint256 takerFilledAmount = filled[takerOrderHash];
         uint256 takerOpened;
 
@@ -80,7 +81,7 @@ contract Exchange {
 
             validatePrice(takerOrderParam, makerOrderParams[i]);
 
-            bytes32 makerOrderHash = validateOrderParam(perpetual, makerOrderParams[i]);
+            bytes32 makerOrderHash = validateOrderParam(perpetual, makerOrderParams[i], uint2str(i));
             uint256 makerFilledAmount = filled[makerOrderHash];
 
             require(amounts[i] <= takerOrderParam.amount.sub(takerFilledAmount), "-1:taker overfilled");
@@ -188,12 +189,13 @@ contract Exchange {
         // check if taker is activated
         if (isActivtedReferral(takerOrderParam.trader)) {
             // taker trading fee
-            takerTradingFee = amount.wmul(price).toInt256().wmul(takerOrderParam.takerFeeRate()).wmul(referreeFeeDiscount);
-            claimTradingFee(perpetual, takerOrderParam.trader, takerTradingFee.wmul(LibMathSigned.WAD().sub(referrerBonusRate)));
-            // referral bonus
+            takerTradingFee = amount.wmul(price).toInt256().wmul(takerOrderParam.takerFeeRate());
+            // referere bonus
             int256 bonus = takerTradingFee.wmul(referrerBonusRate);
             claimReferralBonus(perpetual, takerOrderParam.trader, bonus);
-            emit ClaimReferralBonus(referrals[takerOrderParam.trader], block.timestamp, bonus);
+            // remaining fee to exchange
+            claimTradingFee(perpetual, takerOrderParam.trader, takerTradingFee.sub(bonus));
+            emit ClaimReferralBonus(referrals[takerOrderParam.trader],block.timestamp,bonus);
         } else {
             takerTradingFee = amount.wmul(price).toInt256().wmul(takerOrderParam.takerFeeRate());
             claimTradingFee(perpetual, takerOrderParam.trader, takerTradingFee);
@@ -202,11 +204,12 @@ contract Exchange {
         // check if maker is activated
         if (isActivtedReferral(makerOrderParam.trader)) {
             // maker trading fee
-            makerTradingFee = amount.wmul(price).toInt256().wmul(makerOrderParam.makerFeeRate()).wmul(referreeFeeDiscount);
-            claimTradingFee(perpetual, makerOrderParam.trader, makerTradingFee.wmul(LibMathSigned.WAD().sub(referrerBonusRate)));
-            // referral bonus
+            makerTradingFee = amount.wmul(price).toInt256().wmul(makerOrderParam.takerFeeRate());
+            // referrer bonus
             int256 bonus = makerTradingFee.wmul(referrerBonusRate);
             claimReferralBonus(perpetual, makerOrderParam.trader, bonus);
+            // remaining fee to exchange
+            claimTradingFee(perpetual, makerOrderParam.trader, makerTradingFee.sub(bonus));
             emit ClaimReferralBonus(referrals[makerOrderParam.trader], block.timestamp, bonus);
         } else {
             makerTradingFee = amount.wmul(price).toInt256().wmul(makerOrderParam.makerFeeRate());
@@ -254,19 +257,19 @@ contract Exchange {
      * @param orderParam Order parameter.
      * @return orderHash Valid order hash.
      */
-    function validateOrderParam(IPerpetual perpetual, LibOrder.OrderParam memory orderParam)
+    function validateOrderParam(IPerpetual perpetual, LibOrder.OrderParam memory orderParam,string memory index)
         internal
         view
         returns (bytes32)
     {
-        require(orderParam.orderVersion() == SUPPORTED_ORDER_VERSION, "unsupported version");
-        require(orderParam.expiredAt() >= block.timestamp, "order expired");
-        require(orderParam.chainId() == getChainId(), "unmatched chainid");
+        require(orderParam.orderVersion() == SUPPORTED_ORDER_VERSION, mergeString(index,":unsupported version"));
+        require(orderParam.expiredAt() >= block.timestamp, mergeString(index,":order expired"));
+        require(orderParam.chainId() == getChainId(), mergeString(index,":unmatched chainid"));
 
         bytes32 orderHash = orderParam.getOrderHash(address(perpetual));
-        require(!cancelled[orderHash], "cancelled order");
-        require(orderParam.signature.isValidSignature(orderHash, orderParam.trader), "invalid signature");
-        require(filled[orderHash] < orderParam.amount, "fullfilled order");
+        require(!cancelled[orderHash], mergeString(index,":cancelled order"));
+        require(orderParam.signature.isValidSignature(orderHash, orderParam.trader), mergeString(index,":invalid signature"));
+        require(filled[orderHash] < orderParam.amount, mergeString(index,":fullfilled order"));
 
         return orderHash;
     }

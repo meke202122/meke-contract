@@ -38,7 +38,6 @@ library LibOrder {
          * ║ expiredAt          │ 5               order expiration time in seconds          ║
          * ║ asMakerFeeRate     │ 2               maker fee rate (base 100,000)             ║
          * ║ asTakerFeeRate     │ 2               taker fee rate (base 100,000)             ║
-         * ║ (d) makerRebateRate│ 2               rebate rate for maker (base 100)          ║
          * ║ salt               │ 8               salt                                      ║
          * ║ isMakerOnly        │ 1               is maker only                             ║
          * ║ isInversed         │ 1               is inversed contract                      ║

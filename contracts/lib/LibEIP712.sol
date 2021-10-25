@@ -4,7 +4,7 @@ pragma solidity 0.7.6;
 
 
 library LibEIP712 {
-    string internal constant DOMAIN_NAME = "Mai Protocol";
+    string internal constant DOMAIN_NAME = "Meke Protocol";
 
     bytes32 private constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked("EIP712Domain(string name)"));
 
