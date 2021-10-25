@@ -263,7 +263,7 @@ contract Exchange {
         require(orderParam.expiredAt() >= block.timestamp, "order expired");
         require(orderParam.chainId() == getChainId(), "unmatched chainid");
 
-        bytes32 orderHash = orderParam.getOrderHash(address(perpetual), msg.sender);
+        bytes32 orderHash = orderParam.getOrderHash(address(perpetual));
         require(!cancelled[orderHash], "cancelled order");
         require(orderParam.signature.isValidSignature(orderHash, orderParam.trader), "invalid signature");
         require(filled[orderHash] < orderParam.amount, "fullfilled order");

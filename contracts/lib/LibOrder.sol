@@ -61,15 +61,13 @@ library LibOrder {
      *
      * @param orderParam Order parameters.
      * @param perpetual  Address of perpetual contract.
-     * @param broker     Address of broker.
      * @return orderHash Hash of the order.
      */
     function getOrderHash(
         OrderParam memory orderParam,
-        address perpetual,
-        address broker
+        address perpetual
     ) internal pure returns (bytes32 orderHash) {
-        Order memory order = getOrder(orderParam, perpetual, broker);
+        Order memory order = getOrder(orderParam, perpetual);
         orderHash = LibEIP712.hashEIP712Message(hashOrder(order));
     }
 
@@ -88,16 +86,13 @@ library LibOrder {
      *
      * @param orderParam Order parameters.
      * @param perpetual  Address of perpetual contract.
-     * @param broker     Address of broker.
      * @return order Order data structure.
      */
     function getOrder(
         OrderParam memory orderParam,
-        address perpetual,
-        address broker
+        address perpetual
     ) internal pure returns (LibOrder.Order memory order) {
         order.trader = orderParam.trader;
-        order.broker = broker;
         order.perpetual = perpetual;
         order.amount = orderParam.amount;
         order.price = orderParam.price;
