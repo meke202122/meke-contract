@@ -19,7 +19,7 @@ library LibOrder {
         )
     );
 
-    int256 public constant FEE_RATE_BASE = 10 ** 5;
+    int256 public constant FEE_RATE_BASE = 10 ** 6;
 
     struct Order {
         address trader;
