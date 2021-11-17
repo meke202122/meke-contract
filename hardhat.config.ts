@@ -17,6 +17,7 @@ import "hardhat-deploy-ethers";
 
 import "hardhat-gas-reporter";
 import "@nomiclabs/hardhat-etherscan";
+import "@nomiclabs/hardhat-web3";
 
 const chainIds = {
   ganache: 1337,
@@ -38,7 +39,7 @@ const ALCHEMY_KEY = process.env.ALCHEMY_KEY || "";
 function createConfig(network: keyof typeof chainIds): NetworkUserConfig {
   let url: string;
   if (network === "ArbitrumTest") {
-    url = `https://arb-rinkeby.g.alchemy.com/v2/${ALCHEMY_KEY}`
+    url = ` https://rinkeby.arbitrum.io/rpc`
   } else if (network === "ArbitrumOne") {
     url = `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}`
   } else if (network === "ganache") {

@@ -16,7 +16,7 @@ library LibSignature {
 
     /**
      * Validate a signature given a hash calculated from the order data, the signer, and the
-     * signature data passed in with the order.
+     * signature data passed  in with the order.
      *
      * This function will revert the transaction if the signature method is invalid.
      *

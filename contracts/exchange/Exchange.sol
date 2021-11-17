@@ -7,7 +7,6 @@ import "../lib/LibOrder.sol";
 import "../lib/LibSignature.sol";
 import "../interface/IGlobalConfig.sol";
 import "../interface/IPerpetual.sol";
-import "../interface/IFunding.sol";
 
 contract Exchange {
     using LibMathSigned for int256;
@@ -54,8 +53,9 @@ contract Exchange {
         LibOrder.OrderParam memory takerOrderParam,
         LibOrder.OrderParam[] memory makerOrderParams,
         address _perpetual,
-        uint256[] memory amounts
-    ) public {
+        uint256[] memory amounts,
+        uint256 gasFee
+    ) external {
         require(globalConfig.brokers(msg.sender), "unauthorized broker");
         require(amounts.length > 0 && makerOrderParams.length == amounts.length, "no makers to match");
         require(!takerOrderParam.isMakerOnly(), "taker order is maker only");
@@ -63,12 +63,13 @@ contract Exchange {
         IPerpetual perpetual = IPerpetual(_perpetual);
         require(perpetual.status() == LibTypes.Status.NORMAL, "wrong perpetual status");
 
-        uint256 tradingLotSize = perpetual.getGovernance().tradingLotSize;
-        // "-1" represent taker
-        bytes32 takerOrderHash = validateOrderParam(perpetual, takerOrderParam, "-1");
+        bytes32 takerOrderHash = validateOrderParam(perpetual, takerOrderParam,"-1");
         uint256 takerFilledAmount = filled[takerOrderHash];
+        if (takerFilledAmount == 0){
+            claimGasFee(perpetual,takerOrderParam.trader,gasFee);
+        }
+        // uint256 tradingLotSize = perpetual.getGovernance().tradingLotSize;
         uint256 takerOpened;
-
         for (uint256 i = 0; i < makerOrderParams.length; i++) {
             if (amounts[i] == 0) {
                 continue;
@@ -81,20 +82,22 @@ contract Exchange {
 
             validatePrice(takerOrderParam, makerOrderParams[i]);
 
-            bytes32 makerOrderHash = validateOrderParam(perpetual, makerOrderParams[i], uint2str(i));
+            bytes32 makerOrderHash = validateOrderParam(perpetual, makerOrderParams[i],uint2str(i));
             uint256 makerFilledAmount = filled[makerOrderHash];
-
+            if (makerFilledAmount == 0){
+                claimGasFee(perpetual,makerOrderParams[i].trader,gasFee);
+            }
             require(amounts[i] <= takerOrderParam.amount.sub(takerFilledAmount), "-1:taker overfilled");
-            require(amounts[i] <= makerOrderParams[i].amount.sub(makerFilledAmount),  mergeString(uint2str(i),":maker overfilled"));
-            require(amounts[i].mod(tradingLotSize) == 0, "amount must be divisible by tradingLotSize");
+            require(amounts[i] <= makerOrderParams[i].amount.sub(makerFilledAmount),  mergeS1AndS2ReturnString(uint2str(i),":maker overfilled"));
+            require(amounts[i].mod(perpetual.getGovernance().tradingLotSize) == 0, "amount must be divisible by tradingLotSize");
 
-            uint256 opened = fillOrder(i, perpetual, takerOrderParam, makerOrderParams[i], amounts[i]);
+            uint256 opened = fillOrder(i,perpetual, takerOrderParam, makerOrderParams[i], amounts[i]);
 
             takerOpened = takerOpened.add(opened);
             filled[makerOrderHash] = makerFilledAmount.add(amounts[i]);
             takerFilledAmount = takerFilledAmount.add(amounts[i]);
         }
-        // update fair price
+        // update fair price 
         perpetual.setFairPrice(makerOrderParams[makerOrderParams.length-1].getPrice());
 
         // all trades done, check taker safe.
@@ -181,7 +184,6 @@ contract Exchange {
         );
 
         int256 referrerBonusRate = perpetual.getGovernance().referrerBonusRate;
-        int256 referreeFeeDiscount = perpetual.getGovernance().referreeFeeDiscount;
 
         int256 takerTradingFee;
         int256 makerTradingFee;
@@ -205,12 +207,12 @@ contract Exchange {
         if (isActivtedReferral(makerOrderParam.trader)) {
             // maker trading fee
             makerTradingFee = amount.wmul(price).toInt256().wmul(makerOrderParam.takerFeeRate());
-            // referrer bonus
+            // referere bonus
             int256 bonus = makerTradingFee.wmul(referrerBonusRate);
             claimReferralBonus(perpetual, makerOrderParam.trader, bonus);
             // remaining fee to exchange
             claimTradingFee(perpetual, makerOrderParam.trader, makerTradingFee.sub(bonus));
-            emit ClaimReferralBonus(referrals[makerOrderParam.trader], block.timestamp, bonus);
+            emit ClaimReferralBonus(referrals[makerOrderParam.trader],block.timestamp,bonus);
         } else {
             makerTradingFee = amount.wmul(price).toInt256().wmul(makerOrderParam.makerFeeRate());
             claimTradingFee(perpetual, makerOrderParam.trader, makerTradingFee);
@@ -221,16 +223,15 @@ contract Exchange {
         claimMakerDevFee(perpetual, makerOrderParam.trader, price, makerOpened, amount.sub(makerOpened));
 
         if (makerOpened > 0) {
-            require(perpetual.isIMSafe(makerOrderParam.trader), mergeString(uint2str(index),":maker initial margin unsafe"));
+            require(perpetual.isIMSafe(makerOrderParam.trader), mergeS1AndS2ReturnString(uint2str(index),":maker initial margin unsafe"));
         } else {
-            require(perpetual.isSafe(makerOrderParam.trader), mergeString(uint2str(index),":maker unsafe"));
+            require(perpetual.isSafe(makerOrderParam.trader), mergeS1AndS2ReturnString(uint2str(index),":maker unsafe"));
         }
 
         emit MatchWithOrders(address(perpetual), takerOrderParam, makerOrderParam, amount);
 
         return takerOpened;
     }
-
     /**
      * @dev Check prices are meet.
      *
@@ -262,14 +263,14 @@ contract Exchange {
         view
         returns (bytes32)
     {
-        require(orderParam.orderVersion() == SUPPORTED_ORDER_VERSION, mergeString(index,":unsupported version"));
-        require(orderParam.expiredAt() >= block.timestamp, mergeString(index,":order expired"));
-        require(orderParam.chainId() == getChainId(), mergeString(index,":unmatched chainid"));
+        require(orderParam.orderVersion() == SUPPORTED_ORDER_VERSION, mergeS1AndS2ReturnString(index,":unsupported version"));
+        require(orderParam.expiredAt() >= block.timestamp, mergeS1AndS2ReturnString(index,":order expired"));
+        require(orderParam.chainId() == getChainId(), mergeS1AndS2ReturnString(index,":unmatched chainid"));
 
         bytes32 orderHash = orderParam.getOrderHash(address(perpetual));
-        require(!cancelled[orderHash], mergeString(index,":cancelled order"));
-        require(orderParam.signature.isValidSignature(orderHash, orderParam.trader), mergeString(index,":invalid signature"));
-        require(filled[orderHash] < orderParam.amount, mergeString(index,":fullfilled order"));
+        require(!cancelled[orderHash], mergeS1AndS2ReturnString(index,":cancelled order"));
+        require(orderParam.signature.isValidSignature(orderHash, orderParam.trader), mergeS1AndS2ReturnString(index,":invalid signature"));
+        require(filled[orderHash] < orderParam.amount, mergeS1AndS2ReturnString(index,":fullfilled order"));
 
         return orderHash;
     }
@@ -292,6 +293,21 @@ contract Exchange {
             perpetual.transferCashBalance(trader, msg.sender, fee.toUint256());
         } else if (fee < 0) {
             perpetual.transferCashBalance(msg.sender, trader, fee.neg().toUint256());
+        }
+    }
+    
+
+    function claimGasFee(
+        IPerpetual perpetual,
+        address trader,
+        uint256 fee
+    )
+        internal
+    {
+        if (fee > 0) {
+            perpetual.transferCashBalance(trader, msg.sender, fee);
+        } else if (fee < 0) {
+            perpetual.transferCashBalance(msg.sender, trader, fee);
         }
     }
 
@@ -393,11 +409,12 @@ contract Exchange {
         claimDevFee(perpetual, trader, price, openedAmount, closedAmount, rate);
     }
 
-    function mergeString(string memory s1,string memory s2) view public returns(string memory) {
+    function mergeS1AndS2ReturnString(string memory s1,string memory s2) pure public returns(string memory) {
+
         return string(abi.encodePacked(s1, s2));
     }
-
-    function uint2str(uint _i) internal pure returns (string memory) {
+       
+    function uint2str(uint _i) public pure returns (string memory) {
         if (_i == 0) {
             return "0";
         }

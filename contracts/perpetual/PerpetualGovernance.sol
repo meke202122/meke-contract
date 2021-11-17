@@ -84,9 +84,6 @@ contract PerpetualGovernance is PerpetualStorage {
         } else if (key == "referrerBonusRate") {
             governance.referrerBonusRate = value;
             require(governance.referrerBonusRate > 0 && governance.referrerBonusRate <= 10 ** 18, "referrerBonusRate > 0 && referrerBonusRate <= 1");
-        } else if (key == "referreeFeeDiscount") {
-            governance.referreeFeeDiscount = value;
-            require(governance.referreeFeeDiscount > 0 && governance.referreeFeeDiscount <= 10 ** 18, "referreeFeeDiscount > 0 && referreeFeeDiscount <= 1");
         } else {
             revert("key not exists");
         }
