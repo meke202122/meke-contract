@@ -1,9 +1,7 @@
-node_modules
-
-#Hardhat files
-cache
-artifacts
-typechain
-
+artifacts/
+cache/
+crytic-export/
+node_modules/
+typechain/
 .env
-deployments
+.env.development
