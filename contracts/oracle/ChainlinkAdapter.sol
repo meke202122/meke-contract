@@ -11,18 +11,14 @@ contract ChainlinkAdapter is Ownable {
     using LibMathSigned for int256;
     using LibMathUnsigned for uint256;
 
-    int256 public constant CHAINLINK_DECIMALS_ADAPTER = 10**10;
-    uint256 public constant ONE = 10**18;
+    int256 public constant CHAINLINK_DECIMALS_ADAPTER = 10 ** 10;
+    uint256 public constant ONE = 10 ** 18;
 
     IChainlinkFeeder public feeder;
     uint256 public timeout;
     bool public inversed;
 
-    constructor(
-        address _feeder,
-        uint256 _timeout,
-        bool _inversed
-    ) {
+    constructor(address _feeder, uint256 _timeout, bool _inversed) {
         require(_feeder != address(0), "feeder must not be 0 address");
         timeout = _timeout;
         feeder = IChainlinkFeeder(_feeder);
@@ -35,6 +31,14 @@ contract ChainlinkAdapter is Ownable {
      */
     function setTimeout(uint256 _timeout) external onlyOwner {
         timeout = _timeout;
+    }
+
+    function setFeeder(address _feeder) external onlyOwner {
+        feeder = IChainlinkFeeder(_feeder);
+    }
+
+    function setInversed(bool _inversed) external onlyOwner {
+        inversed = _inversed;
     }
 
     /** Read price from oracle with extra checks.
