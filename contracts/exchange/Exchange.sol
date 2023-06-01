@@ -66,14 +66,15 @@ contract Exchange {
         bytes32 takerOrderHash = validateOrderParam(perpetual, takerOrderParam, "-1");
         uint256 takerFilledAmount = filled[takerOrderHash];
 
-        if (takerFilledAmount != 0) {
-            takerGasFee = 0;
-        }
         uint256 takerOpened;
 
         for (uint256 i = 0; i < makerOrderParams.length; i++) {
             if (orderDatas[i].amount == 0) {
                 continue;
+            }
+
+            if (takerFilledAmount != 0) {
+                takerGasFee = 0;
             }
 
             require(takerOrderParam.trader != makerOrderParams[i].trader, "self trade");
