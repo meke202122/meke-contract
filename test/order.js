@@ -2,17 +2,16 @@ const Web3 = require("web3");
 const { fromRpcSig } = require("ethereumjs-util");
 const assert = require("assert");
 const BigNumber = require("bignumber.js");
-const { sha3, ecrecover, hashPersonalMessage, toBuffer, pubToAddress } = require("ethereumjs-util");
+const { keccakFromString, ecrecover, hashPersonalMessage, toBuffer, pubToAddress } = require("ethereumjs-util");
 const { toWad } = require("./constants");
 
 const getWeb3 = () => {
-  const w = new Web3(web3.currentProvider);
-  // const w = new Web3("http://server10.jy.mcarlo.com:8746");
+  const w = new Web3();
   return w;
 };
 
 const sha3ToHex = message => {
-  return "0x" + sha3(message).toString("hex");
+  return "0x" + keccakFromString(message).toString("hex");
 };
 
 const addLeadingZero = (str, length) => {
@@ -108,16 +107,16 @@ const getOrderHash = order => {
 };
 
 const getOrderSignature = async order => {
-  // const orderHash = getOrderHash(order);
-  // const newWeb3 = getWeb3();
-  // // This depends on the client, ganache-cli/testrpc auto prefix the message header to message
-  // // So we have to set the method ID to 0 even through we use web3.eth.sign
-  // const signature = fromRpcSig(await newWeb3.eth.sign(orderHash, order.trader));
-  // signature.config = `0x${signature.v.toString(16)}00` + '0'.repeat(60);
-  // const isValid = isValidSignature(order.trader, signature, orderHash);
-  // assert.equal(true, isValid);
-  // order.signature = signature;
-  // order.orderHash = orderHash;
+  const orderHash = getOrderHash(order);
+  const newWeb3 = getWeb3();
+  // This depends on the client, ganache-cli/testrpc auto prefix the message header to message
+  // So we have to set the method ID to 0 even through we use web3.eth.sign
+  const signature = fromRpcSig(await newWeb3.eth.sign(orderHash, order.trader));
+  signature.config = `0x${signature.v.toString(16)}00` + '0'.repeat(60);
+  const isValid = isValidSignature(order.trader, signature, orderHash);
+  assert.equal(true, isValid);
+  order.signature = signature;
+  order.orderHash = orderHash;
 };
 
 const getExpiredAt = orderParam => {

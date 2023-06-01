@@ -7,7 +7,7 @@
 Before running any command, make sure to install dependencies:
 
 ```sh
-$ yarn install
+$ pnpm install
 ```
 
 ### Compile
@@ -15,7 +15,7 @@ $ yarn install
 Compile the smart contracts with Hardhat:
 
 ```sh
-$ yarn compile
+$ pnpm compile
 ```
 
 ### Test
@@ -23,21 +23,21 @@ $ yarn compile
 Run the Mocha tests:
 
 ```sh
-$ yarn test
+$ pnpm test
 ```
 
 ### setup deploy env
 
 refer to `.env.example`
 
-### Deploy contract to netowrk (requires Mnemonic and infura API key)
+### Deploy contract to network (requires Mnemonic and infura API key)
 
 ```
-npx hardhat deploy --tags ArbTest --network ArbitrumTest
+pnpm run deploy
 ```
 
-### Validate a contract with etherscan (requires API ke)
+### Validate a contract with etherscan (requires API key)
 
 ```
-npx hardhat verify --network <network> <DEPLOYED_CONTRACT_ADDRESS> "Constructor argument 1"
+pnpm exec hardhat verify --network <network> <DEPLOYED_CONTRACT_ADDRESS> "Constructor argument 1"
 ```
