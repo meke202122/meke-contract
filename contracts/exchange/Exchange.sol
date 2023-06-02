@@ -57,6 +57,8 @@ contract Exchange {
         uint256 takerGasFee
     ) external {
         require(globalConfig.brokers(msg.sender), "unauthorized broker");
+        require(globalConfig.isComponent(_perpetual), "perpetual not in whitelist");
+
         // require(dwgAmounts.length > 1 && makerOrderParams.length == dwgAmounts.length-1, "no makers to match");
         require(!takerOrderParam.isMakerOnly(), "taker order is maker only");
 
