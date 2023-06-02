@@ -147,8 +147,7 @@ library LibMathSigned {
         require(x > 0, "logE of negative number");
         require(x <= 10000000000000000000000000000000000000000, "logE only accepts v <= 1e22 * 1e18"); // in order to prevent using safe-math
         int256 r = 0;
-        uint8 extraDigits = LONGER_DIGITS - FIXED_DIGITS;
-        int256 t = int256(uint256(10)**uint256(extraDigits));
+        int256 t = FIXED_1;
 
         while (x <= FIXED_1 / 10) {
             x = x * 10;
