@@ -80,7 +80,7 @@ library LibOrder {
      * @param perpetual  Address of perpetual contract.
      * @return orderHash Hash of the order.
      */
-    function getOrderHash(OrderParam memory orderParam, address perpetual) internal view returns (bytes32 orderHash) {
+    function getOrderHash(OrderParam memory orderParam, address perpetual) internal pure returns (bytes32 orderHash) {
         Order memory order = getOrder(orderParam, perpetual);
         orderHash = LibEIP712.hashEIP712Message(hashOrder(order));
     }
@@ -91,7 +91,7 @@ library LibOrder {
      * @param order Order to hash.
      * @return orderHash Hash of the order.
      */
-    function getOrderHash(Order memory order) internal view returns (bytes32 orderHash) {
+    function getOrderHash(Order memory order) internal pure returns (bytes32 orderHash) {
         orderHash = LibEIP712.hashEIP712Message(hashOrder(order));
     }
 
