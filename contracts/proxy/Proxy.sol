@@ -19,6 +19,10 @@ contract Proxy {
         setImplementation(_perpetual);
     }
 
+    receive() payable external {
+        _call(implementation());
+    }
+
     fallback() payable external {
         _call(implementation());
     }

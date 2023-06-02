@@ -6,10 +6,8 @@ pragma abicoder v2;
 import "../perpetual/Collateral.sol";
 
 contract TestCollateral is Collateral {
-    constructor(address _globalConfig, address _collateral, uint256 _decimals) 
-        public 
-        Collateral(_globalConfig, _collateral, _decimals) 
-    {}
+    constructor(address _globalConfig, address _collateral, uint256 _decimals)  
+        Collateral(_globalConfig, _collateral, _decimals) {}
 
     function isTokenizedCollateralPublic() public view returns (bool) {
         return isTokenizedCollateral();
