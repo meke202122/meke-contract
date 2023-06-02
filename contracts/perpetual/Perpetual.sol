@@ -391,7 +391,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
         liquidationAmount = liquidationAmount.ceil(governance.lotSize).min(maxAmount).min(liquidatableAmount);
         require(liquidationAmount > 0, "nothing to liquidate");
 
-        (uint256 opened, uint256 closed) = MarginAccount.liquidate(
+        (uint256 opened,) = MarginAccount.liquidate(
             msg.sender,
             trader,
             liquidationPrice,

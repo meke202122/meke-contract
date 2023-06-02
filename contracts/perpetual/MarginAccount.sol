@@ -401,7 +401,7 @@ contract MarginAccount is Collateral {
 
         // position: trader => liquidator
         trade(trader, LibTypes.counterSide(liquidationSide), liquidationPrice, liquidationAmount);
-        (uint256 opened, uint256 closed, uint256 originalSize) = trade(
+        (uint256 opened, uint256 closed,) = trade(
             liquidator,
             liquidationSide,
             liquidationPrice,
