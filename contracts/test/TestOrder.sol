@@ -27,19 +27,8 @@ contract TestOrder {
         return order.hashOrder();
     }
 
-    function getOrderHash3(
-        LibOrder.OrderParam memory orderParam,
-        address perpetual
-    ) public pure returns (bytes32) {
-        return orderParam.getOrderHash(perpetual);
-    }
-
     function getSigner(LibOrder.OrderParam memory orderParam, bytes32 orderHash) public pure returns (address) {
         return orderParam.signature.getSignature(orderHash);
-    }
-
-    function getOrderHash1(LibOrder.Order memory order) public pure returns (bytes32) {
-        return order.getOrderHash();
     }
 
     function expiredAt(LibOrder.OrderParam memory orderParam) public pure returns (uint256) {

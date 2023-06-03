@@ -3,7 +3,6 @@
 pragma solidity 0.7.6;
 pragma abicoder v2;
 
-import "./LibEIP712.sol";
 import "./LibSignature.sol";
 import "./LibMath.sol";
 import "./LibTypes.sol";
@@ -39,6 +38,7 @@ library LibOrder {
          * ║ expiredAt          │ 5               order expiration time in seconds          ║
          * ║ asMakerFeeRate     │ 2               maker fee rate (base 100,000)             ║
          * ║ asTakerFeeRate     │ 2               taker fee rate (base 100,000)             ║
+         * ║ keep               │ 2               unused, filled by zero                    ║
          * ║ salt               │ 8               salt                                      ║
          * ║ isMakerOnly        │ 1               is maker only                             ║
          * ║ isInversed         │ 1               is inversed contract                      ║
@@ -71,28 +71,6 @@ library LibOrder {
         uint256 makerClosed;
         uint256 takerOriginalSize;
         uint256 makerOriginalSize;
-    }
-
-    /**
-     * @dev Get order hash from parameters of order. Rebuild order and hash it.
-     *
-     * @param orderParam Order parameters.
-     * @param perpetual  Address of perpetual contract.
-     * @return orderHash Hash of the order.
-     */
-    function getOrderHash(OrderParam memory orderParam, address perpetual) internal pure returns (bytes32 orderHash) {
-        Order memory order = getOrder(orderParam, perpetual);
-        orderHash = LibEIP712.hashEIP712Message(hashOrder(order));
-    }
-
-    /**
-     * @dev Get order hash from order.
-     *
-     * @param order Order to hash.
-     * @return orderHash Hash of the order.
-     */
-    function getOrderHash(Order memory order) internal pure returns (bytes32 orderHash) {
-        orderHash = LibEIP712.hashEIP712Message(hashOrder(order));
     }
 
     /**

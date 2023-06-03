@@ -18,6 +18,13 @@ contract Exchange {
 
     // to verify the field in order data, increase if there are incompatible update in order's data.
     uint256 public constant SUPPORTED_ORDER_VERSION = 2;
+    bytes32 public immutable domainSeparator=keccak256(abi.encodePacked(
+        keccak256("EIP712Domain(string name,uint256 chainId,string version)"),
+        keccak256("Meke Protocol"),
+        getChainId(),
+        keccak256("1.0")
+    ));
+
     IGlobalConfig public globalConfig;
 
     // referrals
@@ -39,6 +46,10 @@ contract Exchange {
 
     constructor(address _globalConfig) {
         globalConfig = IGlobalConfig(_globalConfig);
+    }
+
+    function getOrderHash(LibOrder.Order memory order) internal view returns (bytes32){
+        return keccak256(abi.encodePacked("\x19\x01", domainSeparator, order.hashOrder()));
     }
 
     // /**
@@ -132,7 +143,7 @@ contract Exchange {
     function cancelOrder(LibOrder.Order memory order) public {
         require(msg.sender == order.trader || msg.sender == order.broker, "invalid caller");
 
-        bytes32 orderHash = order.getOrderHash();
+        bytes32 orderHash = getOrderHash(order);
         cancelled[orderHash] = true;
 
         emit Cancel(orderHash);
@@ -283,7 +294,7 @@ contract Exchange {
         require(orderParam.expiredAt() >= block.timestamp, mergeS1AndS2ReturnString(index, ":order expired"));
         require(orderParam.chainId() == getChainId(), mergeS1AndS2ReturnString(index, ":unmatched chainid"));
 
-        bytes32 orderHash = orderParam.getOrderHash(address(perpetual));
+        bytes32 orderHash = getOrderHash(orderParam.getOrder(address(perpetual)));
         require(!cancelled[orderHash], mergeS1AndS2ReturnString(index, ":cancelled order"));
         require(
             orderParam.signature.isValidSignature(orderHash, orderParam.trader),
