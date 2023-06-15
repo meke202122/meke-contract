@@ -4,6 +4,7 @@ crytic-export/
 node_modules/
 typechain/
 typechain-types/
+typechain-ethers-v5/
 deployments/
 .env
 .env.development
