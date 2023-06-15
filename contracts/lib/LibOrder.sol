@@ -156,11 +156,11 @@ library LibOrder {
     }
 
     function makerFeeRate(OrderParam memory orderParam) internal pure returns (int256) {
-        return int256(int16(bytes2(orderParam.data << (8 * 8)))).mul(LibMathSigned.WAD()).div(FEE_RATE_BASE);
+        return int256(int16(uint16(bytes2(orderParam.data << (8 * 8))))).mul(LibMathSigned.WAD()).div(FEE_RATE_BASE);
     }
 
     function takerFeeRate(OrderParam memory orderParam) internal pure returns (int256) {
-        return int256(int16(bytes2(orderParam.data << (8 * 10)))).mul(LibMathSigned.WAD()).div(FEE_RATE_BASE);
+        return int256(int16(uint16(bytes2(orderParam.data << (8 * 10))))).mul(LibMathSigned.WAD()).div(FEE_RATE_BASE);
     }
 
     function chainId(OrderParam memory orderParam) internal pure returns (uint256) {

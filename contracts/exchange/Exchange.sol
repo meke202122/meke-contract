@@ -175,7 +175,7 @@ contract Exchange {
      *
      * @return id Current chain id.
      */
-    function getChainId() public pure returns (uint256 id) {
+    function getChainId() public view returns (uint256 id) {
         assembly {
             id := chainid()
         }

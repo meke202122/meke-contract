@@ -192,7 +192,7 @@ library LibMathSigned {
         int256 m = (LONGER_FIXED_1 * (x - a1_5)) / (x + a1_5);
         r = r + 2 * m;
         int256 m2 = (m * m) / LONGER_FIXED_1;
-        uint8 i = 3;
+        uint256 i = 3;
         while (true) {
             m = (m * m2) / LONGER_FIXED_1;
             r = r + (2 * m) / int256(i);
