@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-pragma solidity 0.7.6;
+pragma solidity ^0.8.12;
 pragma abicoder v2;
 
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
 import "../lib/LibOrder.sol";
 import "../lib/LibTypes.sol";
 import "../lib/LibMath.sol";
 
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./MarginAccount.sol";
 
 contract Perpetual is MarginAccount, ReentrancyGuard {
@@ -171,7 +172,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
         int256 wadAmount = toWad(rawAmount);
         require(wadAmount <= insuranceFundBalance, "insufficient funds");
         insuranceFundBalance = insuranceFundBalance.sub(wadAmount);
-        pushCollateral(msg.sender, rawAmount);
+        pushCollateral(payable(msg.sender), rawAmount);
         require(insuranceFundBalance >= 0, "negtive insurance fund");
 
         emit UpdateInsuranceFund(insuranceFundBalance);
@@ -198,7 +199,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
      * @param rawAmount Amount to withdraw.
      */
     function withdraw(uint256 rawAmount) external {
-        withdrawImplementation(msg.sender, rawAmount);
+        withdrawImplementation(payable(msg.sender), rawAmount);
     }
 
     /**
@@ -206,7 +207,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
      *         Settle is only available in settled state and can be called multiple times.
      */
     function settle() external nonReentrant {
-        address payable trader = msg.sender;
+        address payable trader = payable(msg.sender);
         settleImplementation(trader);
         int256 wadAmount = marginAccounts[trader].cashBalance;
         if (wadAmount <= 0) {

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-pragma solidity 0.7.6;
+pragma solidity ^0.8.12;
 pragma abicoder v2;
 
 import "../perpetual/Collateral.sol";
@@ -18,7 +18,7 @@ contract TestCollateral is Collateral {
     }
 
     function withdrawPublic(uint256 amount) public {
-        withdraw(msg.sender, amount);
+        withdraw(payable(msg.sender), amount);
     }
 
     function pullCollateralPublic(address trader, uint256 rawAmount) public returns (int256 wadAmount) {

@@ -2,7 +2,7 @@
 
 
 
-pragma solidity 0.7.6;
+pragma solidity ^0.8.12;
 pragma abicoder v2;
 
 abstract contract ERC20Basic {
@@ -207,7 +207,7 @@ contract MyTestToken is StandardToken {
     event Mint(address indexed _to, uint256 _value);
     event Burn(address indexed _to, uint256 _value);
 
-    event sendToken(address indexed recipient, uint256 amount, uint256 uuid);
+    event SendToken(address indexed recipient, uint256 amount, uint256 uuid);
 
     constructor(
         string memory _name,
@@ -247,7 +247,7 @@ contract MyTestToken is StandardToken {
         totalSupply = totalSupply.add(amount);
         isSend[recipient][uuid] = true;
         emit Transfer(address(0), recipient, amount);
-        emit sendToken(recipient, amount, uuid);
+        emit SendToken(recipient, amount, uuid);
     }
 
     function burn(address _from, uint256 _value) public {

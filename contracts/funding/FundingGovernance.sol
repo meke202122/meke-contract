@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-pragma solidity 0.7.6;
+pragma solidity ^0.8.12;
 pragma abicoder v2;
 
 import "@openzeppelin/contracts/utils/Address.sol";
@@ -67,8 +67,9 @@ contract FundingGovernance {
             require(perpetualProxy.status() == LibTypes.Status.EMERGENCY, "wrong perpetual status");
             fundingState.accumulatedFundingPerContract = value;
         } else if (key == "priceFeeder") {
-            require(Address.isContract(address(value)), "wrong address");
-            priceFeeder = IPriceFeeder(value);
+            address addr = address(uint160(uint256(value)));
+            require(Address.isContract(addr), "wrong address");
+            priceFeeder = IPriceFeeder(addr);
         } else {
             revert("key not exists");
         }
