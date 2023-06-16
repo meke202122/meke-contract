@@ -1,7 +1,7 @@
 import { expect, test } from "@jest/globals";
 import hardhat from "hardhat";
 import { deploy } from "../scripts/deploy-utils";
-import { MyTestToken } from "../typechain-ethers-v5";
+import { MyTestToken, MyTestToken__factory } from "../typechain-ethers-v5";
 
 describe("TestToken", () => {
   test("simpleTest", async () => {
@@ -14,7 +14,7 @@ describe("TestToken", () => {
     const unitOne = BigInt(10) ** BigInt(decimals);
     const totalSupply = BigInt(100000000) * unitOne;
 
-    const testToken: MyTestToken = await deploy("MyTestToken", "TestU", "TestU", decimals);
+    const testToken = await deploy<MyTestToken__factory>('MyTestToken', "TestU", "TestU", decimals);
 
     expect(await testToken.decimals()).toBe(decimals);
     expect((await testToken.totalSupply()).toBigInt()).toBe(totalSupply);

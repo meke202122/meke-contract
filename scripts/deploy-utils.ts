@@ -1,7 +1,7 @@
 import path from "path";
 import { mkdir, writeFile, readFile } from "fs/promises";
 import hardhat, { network } from "hardhat";
-import { Contract } from "ethers";
+import { ContractFactory } from "ethers";
 
 export interface Deployment {
   network: string;
@@ -21,7 +21,8 @@ export async function saveDeployment(name: string, address: string, args: any[] 
   };
   const dir = path.join("deployments", network.name);
   await mkdir(dir, { recursive: true }).catch(() => void 0);
-  await writeFile(path.join(dir, name + ".json"), JSON.stringify(data));
+  const file = path.join(dir, name + ".json");
+  await writeFile(file, JSON.stringify(data));
 }
 
 export async function readDeployment(name: string, network = hardhat.network) {
@@ -40,13 +41,15 @@ export async function verify(name: string, network = hardhat.network) {
   }
 }
 
-export async function deploy<T extends Contract>(name: string, ...args: any[]) {
-  const contract = await (await hardhat.ethers.getContractFactory(name)).deploy(...args);
+export async function deploy<T extends ContractFactory>(name: string, ...args: Parameters<T["deploy"]>) {
+  const contract = await ((await hardhat.ethers.getContractFactory(name)) as T).deploy(...args);
   console.log(`deployed ${name} at ${contract.address} on ${hardhat.network.name}[${hardhat.network.config.chainId}]`);
-  if (network.name !== "hardhat") {
+  if (network.name !== "hardhat" || (network as any).forceWrite) {
     await saveDeployment(name, contract.address, args);
-    await contract.deployTransaction.wait(2);
-    await verify(name, network);
+    if (network.name !== "hardhat") {
+      await contract.deployTransaction.wait(1);
+      await verify(name, network);
+    }
   }
-  return contract as T;
+  return contract as ReturnType<T["deploy"]>;
 }

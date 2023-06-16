@@ -2,7 +2,7 @@ import { expect, test } from '@jest/globals'
 import { _TypedDataEncoder } from 'ethers/lib/utils'
 import hardhat from 'hardhat'
 import { deploy } from '../scripts/deploy-utils'
-import { TestMultiSign } from '../typechain-ethers-v5'
+import { TestMultiSign__factory } from '../typechain-ethers-v5'
 
 describe('TestMultiSign', () => {
   test('testAll', async () => {
@@ -10,7 +10,7 @@ describe('TestMultiSign', () => {
 
     const signers = await ethers.getSigners()
     const _signers = signers.slice(1, 4).map((s) => s.address)
-    const testMultiSign: TestMultiSign = await deploy("TestMultiSign", _signers);
+    const testMultiSign = await deploy<TestMultiSign__factory>("TestMultiSign", _signers);
 
     const signerCount = await testMultiSign.getSignerCount()
     expect(signerCount.toBigInt()).toBe(BigInt(_signers.length))
