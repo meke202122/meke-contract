@@ -1,7 +1,7 @@
 import { expect, test } from "@jest/globals";
 import hardhat from "hardhat";
 import { deploy } from "../scripts/deploy-utils";
-import { MyTestToken, MyTestToken__factory } from "../typechain-ethers-v5";
+import { MyTestToken__factory } from "../typechain-ethers-v5";
 
 describe("TestToken", () => {
   test("simpleTest", async () => {
