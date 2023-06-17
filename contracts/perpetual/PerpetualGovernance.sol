@@ -34,7 +34,7 @@ contract PerpetualGovernance is PerpetualStorage {
 
     // Check if system is current paused. 
     modifier onlyNotPaused () {
-        require(!paused, "system paused");
+        require(!paused(), "system paused");
         _;
     }
 

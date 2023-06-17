@@ -16,8 +16,8 @@ contract PerpetualStorage {
     using LibMathSigned for int256;
     using LibMathUnsigned for uint256;
 
-    bool public paused = false;
-    bool public withdrawDisabled = false;
+    uint64 public pausedExpiration;
+    uint64 public withdrawDisabledExpiration;
 
     uint256 public flatAmount = 10**18;
 
@@ -48,6 +48,13 @@ contract PerpetualStorage {
 
     // TODO: Should be UpdateSocialLoss but to compatible off-chain part
     event SocialLoss(LibTypes.Side side, int256 newVal);
+
+    function paused() public view returns (bool) {
+        return pausedExpiration > block.timestamp;
+    }
+    function withdrawDisabled() public view returns (bool) {
+        return withdrawDisabledExpiration > block.timestamp;
+    }
 
     /**
      * @dev Helper to access social loss per contract.

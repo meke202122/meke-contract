@@ -21,9 +21,9 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
     mapping(address => bool) private accountCreated;
 
     event CreatePerpetual();
-    event Paused(address indexed caller);
+    event Paused(address indexed caller, uint64 expiration);
     event Unpaused(address indexed caller);
-    event DisableWithdraw(address indexed caller);
+    event DisableWithdraw(address indexed caller, uint64 expiration);
     event EnableWithdraw(address indexed caller);
     event CreateAccount(uint256 indexed id, address indexed trader);
     event Trade(address indexed trader, LibTypes.Side side, uint256 price, uint256 amount);
@@ -50,12 +50,13 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
 
     /**
      * @dev Called by a pauseControllers, put whole system into paused state.
+     * @param duration seconds.
      */
-    function pause() external {
+    function pause(uint32 duration) external {
         require(globalConfig.pauseControllers(msg.sender) || globalConfig.owner() == msg.sender, "unauthorized caller");
-        require(!paused, "already paused");
-        paused = true;
-        emit Paused(msg.sender);
+        require(duration <= 7 days, "duration too long");
+        pausedExpiration = uint64(block.timestamp + duration);
+        emit Paused(msg.sender, pausedExpiration);
     }
 
     /**
@@ -63,34 +64,29 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
      */
     function unpause() external {
         require(globalConfig.pauseControllers(msg.sender) || globalConfig.owner() == msg.sender, "unauthorized caller");
-        require(paused, "not paused");
-        paused = false;
+        require(paused(), "not paused");
+        pausedExpiration = 0;
         emit Unpaused(msg.sender);
     }
 
     /**
      * @dev Called by a withdrawControllers disable withdraw function.
+     * @param duration seconds.
      */
-    function disableWithdraw() external {
-        require(
-            globalConfig.withdrawControllers(msg.sender) || globalConfig.owner() == msg.sender,
-            "unauthorized caller"
-        );
-        require(!withdrawDisabled, "already disabled");
-        withdrawDisabled = true;
-        emit DisableWithdraw(msg.sender);
+    function disableWithdraw(uint32 duration) external {
+        require(globalConfig.withdrawControllers(msg.sender) || globalConfig.owner() == msg.sender, "unauthorized caller");
+        require(duration <= 7 days, "duration too long");
+        withdrawDisabledExpiration = uint64(block.timestamp + duration);
+        emit DisableWithdraw(msg.sender, withdrawDisabledExpiration);
     }
 
     /**
      * @dev Called by a withdrawControllers, enable withdraw function again.
      */
     function enableWithdraw() external {
-        require(
-            globalConfig.withdrawControllers(msg.sender) || globalConfig.owner() == msg.sender,
-            "unauthorized caller"
-        );
-        require(withdrawDisabled, "not disabled");
-        withdrawDisabled = false;
+        require(globalConfig.withdrawControllers(msg.sender) || globalConfig.owner() == msg.sender,"unauthorized caller");
+        require(withdrawDisabled(), "not disabled");
+        withdrawDisabledExpiration = 0;
         emit EnableWithdraw(msg.sender);
     }
 
@@ -492,7 +488,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
      * @param rawAmount Amount to withdraw.
      */
     function withdrawImplementation(address payable trader, uint256 rawAmount) internal onlyNotPaused nonReentrant {
-        require(!withdrawDisabled, "withdraw disabled");
+        require(!withdrawDisabled(), "withdraw disabled");
         require(status == LibTypes.Status.NORMAL, "wrong perpetual status");
         require(rawAmount > 0, "amount must be greater than 0");
         require(trader != address(0), "cannot withdraw to 0 address");
