@@ -52,7 +52,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
      * @dev Called by a pauseControllers, put whole system into paused state.
      */
     function pause() external {
-        require(globalConfig.pauseControllers(msg.sender) || globalConfig.owner() == msg.sender, "unauthorized caller");
+        require(globalConfig.pauseControllers(msg.sender), "unauthorized caller");
         require(!paused, "already paused");
         paused = true;
         emit Paused(msg.sender);
@@ -62,7 +62,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
      * @dev Called by a pauseControllers, put whole system back to normal.
      */
     function unpause() external {
-        require(globalConfig.pauseControllers(msg.sender) || globalConfig.owner() == msg.sender, "unauthorized caller");
+        require(globalConfig.pauseControllers(msg.sender), "unauthorized caller");
         require(paused, "not paused");
         paused = false;
         emit Unpaused(msg.sender);
@@ -72,10 +72,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
      * @dev Called by a withdrawControllers disable withdraw function.
      */
     function disableWithdraw() external {
-        require(
-            globalConfig.withdrawControllers(msg.sender) || globalConfig.owner() == msg.sender,
-            "unauthorized caller"
-        );
+        require(globalConfig.withdrawControllers(msg.sender), "unauthorized caller");
         require(!withdrawDisabled, "already disabled");
         withdrawDisabled = true;
         emit DisableWithdraw(msg.sender);
@@ -85,10 +82,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
      * @dev Called by a withdrawControllers, enable withdraw function again.
      */
     function enableWithdraw() external {
-        require(
-            globalConfig.withdrawControllers(msg.sender) || globalConfig.owner() == msg.sender,
-            "unauthorized caller"
-        );
+        require(globalConfig.withdrawControllers(msg.sender), "unauthorized caller");
         require(withdrawDisabled, "not disabled");
         withdrawDisabled = false;
         emit EnableWithdraw(msg.sender);
@@ -101,7 +95,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
      * @param trader Address of account owner.
      * @param amount Absolute cash balance value to be set.
      */
-    function increaseCashBalance(address trader, uint256 amount) external onlyOwner {
+    function increaseCashBalance(address trader, uint256 amount) external onlyMultiSigned {
         require(status == LibTypes.Status.EMERGENCY, "wrong perpetual status");
         updateCashBalance(trader, amount.toInt256());
     }
@@ -113,7 +107,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
      * @param trader Address of account owner.
      * @param amount Absolute cash balance value to be set.
      */
-    function decreaseCashBalance(address trader, uint256 amount) external onlyOwner {
+    function decreaseCashBalance(address trader, uint256 amount) external onlyMultiSigned {
         require(status == LibTypes.Status.EMERGENCY, "wrong perpetual status");
         updateCashBalance(trader, amount.toInt256().neg());
     }
@@ -124,7 +118,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
      *
      * @param price Price used as mark price in emergency mode.
      */
-    function beginGlobalSettlement(uint256 price) external onlyOwner {
+    function beginGlobalSettlement(uint256 price) external onlyMultiSigned {
         require(status != LibTypes.Status.SETTLED, "wrong perpetual status");
         status = LibTypes.Status.EMERGENCY;
 
@@ -136,7 +130,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
      * @notice Set perpetual status to 'settled'. It can be call only once in 'emergency' mode.
      *         In settled mode, user is expected to closed positions and withdraw all the collateral.
      */
-    function endGlobalSettlement() external onlyOwner {
+    function endGlobalSettlement() external onlyMultiSigned {
         require(status == LibTypes.Status.EMERGENCY, "wrong perpetual status");
         status = LibTypes.Status.SETTLED;
 
@@ -165,7 +159,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
      *
      * @param rawAmount Amount to withdraw.
      */
-    function withdrawFromInsuranceFund(uint256 rawAmount) external onlyOwner nonReentrant {
+    function withdrawFromInsuranceFund(uint256 rawAmount) external onlyMultiSigned nonReentrant {
         require(rawAmount > 0, "amount must be greater than 0");
         require(insuranceFundBalance > 0, "insufficient funds");
 

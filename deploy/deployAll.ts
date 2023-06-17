@@ -68,7 +68,7 @@ export async function deployUsdt() {
 
 export async function deployAll(): Promise<void> {
   const { ethers, network } = hardhat;
-  ;(network as any).forceWrite=true
+  //;(network as any).forceWrite=true
 
   const signers = await ethers.getSigners();
   const deployer = signers[0].address;
@@ -79,13 +79,13 @@ export async function deployAll(): Promise<void> {
 
   //ContractReader
   let contractRreader = await deploy<ContractReader__factory>("ContractReader");
-  console.log('kkk')
 
   // GlobalConfig
   let globalConfig = await deploy<GlobalConfig__factory>("GlobalConfig");
 
   // exchange
   let exchange = await deploy<Exchange__factory>("Exchange", globalConfig.address);
+  await globalConfig.addCaller(exchange.address);
 
   // USDT
   const usdt = await deployUsdt();
@@ -100,6 +100,7 @@ export async function deployAll(): Promise<void> {
 
   // Perpetual
   let perpetual = await deploy<Perpetual__factory>("Perpetual", globalConfig.address, usdt.address, dev, usdt.decimals);
+  globalConfig.addCaller(perpetual.address)
 
   // Proxy
   let proxy = await deploy<Proxy__factory>("Proxy", perpetual.address);
@@ -111,6 +112,7 @@ export async function deployAll(): Promise<void> {
     proxy.address,
     chainlinkAdapter.address,
   );
+  await globalConfig.addCaller(funding.address)
 
   console.log("whitelist of perpetual");
   await globalConfig.addComponent(perpetual.address, proxy.address);

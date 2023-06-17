@@ -21,9 +21,10 @@ contract PerpetualGovernance is PerpetualStorage {
     }
 
     // Check if sender is owner.
-    modifier onlyOwner() {
-        require(globalConfig.owner() == msg.sender, "not owner");
-        _;
+    modifier onlyMultiSigned() {
+        if(globalConfig.multiSigned(msg.sender, msg.sig, msg.data)){
+            _;
+        }
     }
 
     // Check if sender is authorized to call some critical functions.
@@ -44,7 +45,7 @@ contract PerpetualGovernance is PerpetualStorage {
      * @param key   Name of parameter.
      * @param value Value of parameter.
      */
-    function setGovernanceParameter(bytes32 key, int256 value) public onlyOwner {
+    function setGovernanceParameter(bytes32 key, int256 value) public onlyMultiSigned {
         if (key == "initialMarginRate") {
             governance.initialMarginRate = value.toUint256();
             require(governance.initialMarginRate > 0, "require im > 0");
@@ -96,7 +97,7 @@ contract PerpetualGovernance is PerpetualStorage {
      * @param key   Name of parameter.
      * @param value Address to set.
      */
-    function setGovernanceAddress(bytes32 key, address value) public onlyOwner {
+    function setGovernanceAddress(bytes32 key, address value) public onlyMultiSigned {
         require(value != address(0), "invalid address");
         if (key == "dev") {
             devAddress = value;

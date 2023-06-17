@@ -3,14 +3,7 @@
 pragma solidity ^0.8.12;
 
 interface IGlobalConfig {
-
-    function owner() external view returns (address);
-
-    function isOwner() external view returns (bool);
-
-    function renounceOwnership() external;
-
-    function transferOwnership(address newOwner) external;
+    function multiSigned(address msgSender, bytes4 msgSig, bytes memory msgData) external returns (bool passed);
 
     function brokers(address broker) external view returns (bool);
     

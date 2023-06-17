@@ -44,11 +44,18 @@ abstract contract MultiSign {
         }
     }
 
-    modifier onlyMultiSigned() {
-        require(signers.contains(msg.sender), "the caller is not the signer");
+    function _clearAll(uint len) internal {
+        for (uint i = 0; i < len; i++) {
+            (address signer, uint existingHash) = signers.at(i);
+            if (existingHash != 0) {
+                signers.set(signer, 0);
+            }
+        }
+    }
 
-        uint operationHash = uint(keccak256(msg.data));
-
+    function _multiSigned(address msgSender, bytes4 msgSig, bytes memory msgData) internal returns (bool passed) {
+        require(signers.contains(msgSender), "the caller is not the signer");
+        uint operationHash = uint(keccak256(msgData));
         uint8 N = _denominator;
         uint len = signers.length();
         uint minSignedCountxN = len * _molecular;
@@ -67,23 +74,18 @@ abstract contract MultiSign {
                 }
             }
         }
-        signers.set(msg.sender, operationHash);
-
-        bool passed = signedCountxN >= minSignedCountxN;
+        signers.set(msgSender, operationHash);
+        passed = signedCountxN >= minSignedCountxN;
+        _lastSignTimestamp = block.timestamp;
+        emit MultiSigned(msgSender, passed, msgSig, msgData);
         if (passed) {
             _clearAll(len);
-            _;
         }
-        _lastSignTimestamp = block.timestamp;
-        emit MultiSigned(msg.sender, passed, msg.sig, msg.data);
     }
 
-    function _clearAll(uint len) internal {
-        for (uint i = 0; i < len; i++) {
-            (address signer, uint existingHash) = signers.at(i);
-            if (existingHash != 0) {
-                signers.set(signer, 0);
-            }
+    modifier onlyMultiSigned() {
+        if (_multiSigned(msg.sender, msg.sig, msg.data)) {
+            _;
         }
     }
 
@@ -96,7 +98,7 @@ abstract contract MultiSign {
     }
 
     function getSignerAt(uint index) public view returns (address signer) {
-        require( index < signers.length(), "index out of range");
+        require(index < signers.length(), "index out of range");
         (signer, ) = signers.at(index);
     }
 

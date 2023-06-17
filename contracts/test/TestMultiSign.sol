@@ -2,14 +2,14 @@
 pragma solidity ^0.8.12;
 pragma abicoder v2;
 
-import "../lib/MultiSign.sol";
+import "../lib/WhitelistMultiSign.sol";
 
-contract TestMultiSign is MultiSign {
+contract TestMultiSign is WhitelistMultiSign {
     uint public lastBlockNumber;
     uint public lastTimestamp;
     address public lastWriter;
 
-    constructor(address[] memory signers) MultiSign(signers) {
+    constructor(address[] memory signers, address[] memory callers) WhitelistMultiSign(signers, callers) {
         lastBlockNumber = block.number;
         lastTimestamp = block.timestamp;
         lastWriter = msg.sender;

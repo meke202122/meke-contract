@@ -32,15 +32,7 @@ contract ChainlinkAdapter is Ownable {
     function setTimeout(uint256 _timeout) external onlyOwner {
         timeout = _timeout;
     }
-
-    function setFeeder(address _feeder) external onlyOwner {
-        feeder = IChainlinkFeeder(_feeder);
-    }
-
-    function setInversed(bool _inversed) external onlyOwner {
-        inversed = _inversed;
-    }
-
+    
     /** Read price from oracle with extra checks.
      */
     function price() public view returns (uint256 newPrice, uint256 timestamp) {

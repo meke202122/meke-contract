@@ -34,9 +34,10 @@ contract FundingGovernance {
         globalConfig = IGlobalConfig(_globalConfig);
     }
 
-    modifier onlyOwner() {
-        require(globalConfig.owner() == msg.sender, "not owner");
-        _;
+    modifier onlyMultiSigned() {
+        if(globalConfig.multiSigned(msg.sender, msg.sig, msg.data)){
+            _;
+        }
     }
 
     modifier onlyAuthorized() {
@@ -50,7 +51,7 @@ contract FundingGovernance {
      * @param key   Name of parameter.
      * @param value Value of parameter.
      */
-    function setGovernanceParameter(bytes32 key, int256 value) public onlyOwner {
+    function setGovernanceParameter(bytes32 key, int256 value) public onlyMultiSigned {
         if (key == "emaAlpha") {
             require(value > 0, "alpha should be > 0");
             require(value <= 10**18, "alpha should be <= 1");

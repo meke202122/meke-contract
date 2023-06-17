@@ -2,11 +2,10 @@
 
 pragma solidity ^0.8.12;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-
 import "../lib/LibList.sol";
+import "../lib/WhitelistMultiSign.sol";
 
-contract GlobalConfig is Ownable {
+contract GlobalConfig is WhitelistMultiSign {
 
     using LibList for mapping(address => bool);
 
@@ -29,7 +28,7 @@ contract GlobalConfig is Ownable {
     event AddComponent(address indexed perpetual, address indexed component);
     event RemovedComponent(address indexed perpetual, address indexed component);
 
-    constructor() {
+    constructor() WhitelistMultiSign(new address[](0), new address[](0)) {
         emit CreateGlobalConfig();
     }
 
@@ -38,7 +37,7 @@ contract GlobalConfig is Ownable {
      *
      * @param broker Address of broker.
      */
-    function addBroker(address broker) external onlyOwner {
+    function addBroker(address broker) external onlyMultiSigned {
         brokers.add(broker);
         emit AddBroker(broker);
     }
@@ -48,7 +47,7 @@ contract GlobalConfig is Ownable {
      *
      * @param broker Address of broker.
      */
-    function removeBroker(address broker) external onlyOwner {
+    function removeBroker(address broker) external onlyMultiSigned {
         brokers.remove(broker);
         emit RemoveBroker(broker);
     }
@@ -69,7 +68,7 @@ contract GlobalConfig is Ownable {
      * @param perpetual Address of perpetual.
      * @param component Address of component.
      */
-    function addComponent(address perpetual, address component) external onlyOwner {
+    function addComponent(address perpetual, address component) external onlyMultiSigned {
         require(!components[perpetual][component], "component already exist");
         components[perpetual][component] = true;
         emit AddComponent(perpetual, component);
@@ -81,7 +80,7 @@ contract GlobalConfig is Ownable {
      * @param perpetual Address of perpetual.
      * @param component Address of component.
      */
-    function removeComponent(address perpetual, address component) external onlyOwner {
+    function removeComponent(address perpetual, address component) external onlyMultiSigned {
         require(components[perpetual][component], "component not exist");
         components[perpetual][component] = false;
         emit RemovedComponent(perpetual, component);
@@ -92,7 +91,7 @@ contract GlobalConfig is Ownable {
      *
      * @param controller Address of controller.
      */
-    function addPauseController(address controller) external onlyOwner {
+    function addPauseController(address controller) external onlyMultiSigned {
         pauseControllers.add(controller);
         emit AddPauseController(controller);
     }
@@ -102,7 +101,7 @@ contract GlobalConfig is Ownable {
      *
      * @param controller Address of controller.
      */
-    function removePauseController(address controller) external onlyOwner {
+    function removePauseController(address controller) external onlyMultiSigned {
         pauseControllers.remove(controller);
         emit RemovePauseController(controller);
     }
@@ -112,7 +111,7 @@ contract GlobalConfig is Ownable {
      *
      * @param controller Address of controller.
      */
-    function addWithdrawController(address controller) external onlyOwner {
+    function addWithdrawController(address controller) external onlyMultiSigned {
         withdrawControllers.add(controller);
         emit AddWithdrawController(controller);
     }
@@ -122,7 +121,7 @@ contract GlobalConfig is Ownable {
      *
      * @param controller Address of controller.
      */
-    function removeWithdrawController(address controller) external onlyOwner {
+    function removeWithdrawController(address controller) external onlyMultiSigned {
         withdrawControllers.remove(controller);
         emit RemovedWithdrawController(controller);
     }
