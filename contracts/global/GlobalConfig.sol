@@ -17,7 +17,7 @@ contract GlobalConfig is Ownable {
     // Authrozied user, who is allowed to call disable/enable withdraw in perpetual.
     mapping(address => bool) public withdrawControllers;
     // components can call some dangerous methods in perpetual.
-    mapping(address => mapping(address => bool)) public components;
+    // mapping(address => mapping(address => bool)) public components;
 
     event CreateGlobalConfig();
     event AddBroker(address indexed broker);
@@ -59,9 +59,9 @@ contract GlobalConfig is Ownable {
      * @param component Address of component contract.
      * @return True if given address is a component of sender.
      */
-    function isComponent(address component) external view returns (bool) {
-        return components[msg.sender][component];
-    }
+    // function isComponent(address component) external view returns (bool) {
+    //     return components[msg.sender][component];
+    // }
 
      /**
      * @dev Add a component to whitelist of a perpetual.
@@ -69,11 +69,11 @@ contract GlobalConfig is Ownable {
      * @param perpetual Address of perpetual.
      * @param component Address of component.
      */
-    function addComponent(address perpetual, address component) external onlyOwner {
-        require(!components[perpetual][component], "component already exist");
-        components[perpetual][component] = true;
-        emit AddComponent(perpetual, component);
-    }
+    // function addComponent(address perpetual, address component) external onlyOwner {
+    //     require(!components[perpetual][component], "component already exist");
+    //     components[perpetual][component] = true;
+    //     emit AddComponent(perpetual, component);
+    // }
 
      /**
      * @dev Remove a component from whitelist of a perpetual.
@@ -81,11 +81,11 @@ contract GlobalConfig is Ownable {
      * @param perpetual Address of perpetual.
      * @param component Address of component.
      */
-    function removeComponent(address perpetual, address component) external onlyOwner {
-        require(components[perpetual][component], "component not exist");
-        components[perpetual][component] = false;
-        emit RemovedComponent(perpetual, component);
-    }
+    // function removeComponent(address perpetual, address component) external onlyOwner {
+    //     require(components[perpetual][component], "component not exist");
+    //     components[perpetual][component] = false;
+    //     emit RemovedComponent(perpetual, component);
+    // }
 
     /**
      * @dev Add authorized pause controller.

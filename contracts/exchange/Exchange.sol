@@ -9,12 +9,17 @@ import "../lib/LibSignature.sol";
 import "../interface/IGlobalConfig.sol";
 import "../interface/IPerpetual.sol";
 
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+
 contract Exchange {
     using LibMathSigned for int256;
     using LibMathUnsigned for uint256;
     using LibOrder for LibOrder.Order;
     using LibOrder for LibOrder.OrderParam;
     using LibSignature for LibSignature.OrderSignature;
+    using EnumerableSet for EnumerableSet.AddressSet;
+
+
 
     // to verify the field in order data, increase if there are incompatible update in order's data.
     uint256 public constant SUPPORTED_ORDER_VERSION = 2;
@@ -26,6 +31,9 @@ contract Exchange {
     ));
 
     IGlobalConfig public globalConfig;
+
+    
+    EnumerableSet.AddressSet internal perpetuals;
 
     // referrals
     mapping(address => address) public referrals;
@@ -48,6 +56,30 @@ contract Exchange {
         globalConfig = IGlobalConfig(_globalConfig);
     }
 
+    modifier onlyOwner() {
+        require(globalConfig.owner() == msg.sender, "not owner");
+        _;
+    }
+
+    function addPerpetual(address perpetual) external onlyOwner returns (bool) {
+        require(!perpetuals.contains(perpetual),"already exists");
+        return perpetuals.add(perpetual);
+    }
+
+    function removePerpetual(address perpetual) external onlyOwner returns (bool) {
+        require(perpetuals.contains(perpetual),"not found");
+        return perpetuals.remove(perpetual);
+    }
+
+    function getPerpetualAt(uint256 index) external view returns(address) {
+        require(index< perpetuals.length(), "index out of range");
+        return perpetuals.at(index);
+    }
+
+    function getPerpetualCount() external view returns(uint256) {
+        return perpetuals.length();
+    }
+
     function getOrderHash(LibOrder.Order memory order) internal view returns (bytes32){
         return keccak256(abi.encodePacked("\x19\x01", domainSeparator, order.hashOrder()));
     }
@@ -68,7 +100,7 @@ contract Exchange {
         uint256 takerGasFee
     ) external {
         require(globalConfig.brokers(msg.sender), "unauthorized broker");
-        require(globalConfig.isComponent(_perpetual), "perpetual not in whitelist");
+        require(perpetuals.contains(_perpetual), "perpetual not in whitelist");
 
         // require(dwgAmounts.length > 1 && makerOrderParams.length == dwgAmounts.length-1, "no makers to match");
         require(!takerOrderParam.isMakerOnly(), "taker order is maker only");

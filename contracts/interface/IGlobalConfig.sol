@@ -22,11 +22,11 @@ interface IGlobalConfig {
 
     function removeBroker() external;
 
-    function isComponent(address component) external view returns (bool);
+    // function isComponent(address component) external view returns (bool);
 
-    function addComponent(address perpetual, address component) external;
+    // function addComponent(address perpetual, address component) external;
 
-    function removeComponent(address perpetual, address component) external;
+    // function removeComponent(address perpetual, address component) external;
 
     function addPauseController(address controller) external;
 
