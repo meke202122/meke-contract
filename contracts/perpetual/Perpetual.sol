@@ -97,10 +97,10 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
      * @param trader Address of account owner.
      * @param amount Absolute cash balance value to be set.
      */
-    function increaseCashBalance(address trader, uint256 amount) external onlyOwner {
-        require(status == LibTypes.Status.EMERGENCY, "wrong perpetual status");
-        updateCashBalance(trader, amount.toInt256());
-    }
+    // function increaseCashBalance(address trader, uint256 amount) external onlyOwner {
+    //     require(status == LibTypes.Status.EMERGENCY, "wrong perpetual status");
+    //     updateCashBalance(trader, amount.toInt256());
+    // }
 
     /**
      * @notice Force to set cash balance of margin account. Called by administrator to
@@ -108,11 +108,11 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
      *
      * @param trader Address of account owner.
      * @param amount Absolute cash balance value to be set.
-     */
-    function decreaseCashBalance(address trader, uint256 amount) external onlyOwner {
-        require(status == LibTypes.Status.EMERGENCY, "wrong perpetual status");
-        updateCashBalance(trader, amount.toInt256().neg());
-    }
+    //  */
+    // function decreaseCashBalance(address trader, uint256 amount) external onlyOwner {
+    //     require(status == LibTypes.Status.EMERGENCY, "wrong perpetual status");
+    //     updateCashBalance(trader, amount.toInt256().neg());
+    // }
 
     /**
      * @notice Set perpetual status to 'emergency'. It can be called multiple times to set price.
