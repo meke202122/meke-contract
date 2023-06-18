@@ -35,9 +35,11 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
         address _globalConfig,
         address _collateral,
         address _devAddress,
-        uint256 _collateralDecimals
+        uint256 _collateralDecimals,
+        address _exchange
     ) MarginAccount(_globalConfig, _collateral, _collateralDecimals) {
         devAddress = _devAddress;
+        exchange = IExchange(_exchange);
         emit CreatePerpetual();
     }
 
@@ -224,7 +226,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
      * @param trader    Address of margin account to deposit into.
      * @param rawAmount Amount of collateral to deposit.
      */
-    function depositFor(address trader, uint256 rawAmount) external payable onlyAuthorized {
+    function depositFor(address trader, uint256 rawAmount) external payable onlyExchange {
         depositImplementation(trader, rawAmount);
     }
 
@@ -236,7 +238,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
      * @param trader    Address of margin account to deposit into.
      * @param rawAmount Amount of collateral to deposit.
      */
-    function withdrawFor(address payable trader, uint256 rawAmount) external onlyAuthorized {
+    function withdrawFor(address payable trader, uint256 rawAmount) external onlyExchange {
         withdrawImplementation(trader, rawAmount);
     }
 
@@ -413,7 +415,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
         LibTypes.Side side,
         uint256 price,
         uint256 amount
-    ) public onlyNotPaused onlyAuthorized returns (LibOrder.TradeData memory tradeData) {
+    ) public onlyNotPaused onlyExchange returns (LibOrder.TradeData memory tradeData) {
         require(status != LibTypes.Status.EMERGENCY, "wrong perpetual status");
         require(side == LibTypes.Side.LONG || side == LibTypes.Side.SHORT, "side must be long or short");
         require(isValidLotSize(amount), "amount must be divisible by lotSize");
@@ -441,7 +443,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
         address from,
         address to,
         uint256 amount
-    ) public onlyNotPaused onlyAuthorized {
+    ) public onlyNotPaused onlyExchange {
         require(status != LibTypes.Status.EMERGENCY, "wrong perpetual status");
         MarginAccount.transferBalance(from, to, amount.toInt256());
     }
@@ -524,7 +526,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
         emit UpdatePositionAccount(trader, account, totalSize(originalSide), currentMarkPrice);
     }
 
-    function setFairPrice(uint256 price) external onlyAuthorized {
+    function setFairPrice(uint256 price) external onlyExchange {
         fundingModule.setFairPrice(price);
     }
 }

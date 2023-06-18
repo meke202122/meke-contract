@@ -39,8 +39,13 @@ contract FundingGovernance {
         _;
     }
 
-    modifier onlyAuthorized() {
-        require(globalConfig.isComponent(msg.sender), "unauthorized caller");
+    // modifier onlyAuthorized() {
+    //     require(globalConfig.isComponent(msg.sender), "unauthorized caller");
+    //     _;
+    // }
+
+    modifier onlyPerpetual(){
+        require(address(perpetualProxy) == msg.sender, "not perpetual");
         _;
     }
 

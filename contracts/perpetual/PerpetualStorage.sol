@@ -10,7 +10,7 @@ import "../lib/LibTypes.sol";
 
 import "../interface/IFunding.sol";
 import "../interface/IGlobalConfig.sol";
-
+import "../interface/IExchange.sol";
 
 contract PerpetualStorage {
     using LibMathSigned for int256;
@@ -25,6 +25,9 @@ contract PerpetualStorage {
     IGlobalConfig public globalConfig;
     // funding module address
     IFunding public fundingModule;
+
+    IExchange public exchange;
+
     // Address of collateral;
     IERC20 public collateral;
     // DEV address

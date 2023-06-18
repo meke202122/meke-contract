@@ -27,8 +27,13 @@ contract PerpetualGovernance is PerpetualStorage {
     }
 
     // Check if sender is authorized to call some critical functions.
-    modifier onlyAuthorized() {
-        require(globalConfig.isComponent(msg.sender), "unauthorized caller");
+    // modifier onlyAuthorized() {
+    //     require(globalConfig.isComponent(msg.sender), "unauthorized caller");
+    //     _;
+    // }
+
+    modifier onlyExchange(){
+        require(address(exchange) == msg.sender, "not exchange");
         _;
     }
 

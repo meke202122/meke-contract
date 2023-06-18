@@ -233,7 +233,7 @@ contract Funding is FundingGovernance {
         return _fairPrice;
     }
 
-    function setFairPrice(uint256 price) external onlyAuthorized {
+    function setFairPrice(uint256 price) external onlyPerpetual {
         _fairPrice = price;
         forceFunding();
     }
