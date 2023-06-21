@@ -79,13 +79,14 @@ export async function deployAll(): Promise<void> {
 
   //ContractReader
   let contractRreader = await deploy<ContractReader__factory>("ContractReader");
-  console.log('kkk')
 
   // GlobalConfig
   let globalConfig = await deploy<GlobalConfig__factory>("GlobalConfig");
+  await globalConfig.addBroker(deployer);
 
   // exchange
   let exchange = await deploy<Exchange__factory>("Exchange", globalConfig.address);
+  
 
   // USDT
   const usdt = await deployUsdt();
@@ -93,39 +94,19 @@ export async function deployAll(): Promise<void> {
   // ChainlinkAdapter
   const chainlinkAdapter = await deployChainLinkAdapter(usdt.decimals);
 
-  // Broker
-  let broker = await deploy<Broker__factory>("Broker", chainlinkAdapter.address, exchange.address);
-  await globalConfig.addBroker(broker.address);
-  await globalConfig.addBroker(deployer);
+  // // Broker
+  // let broker = await deploy<Broker__factory>("Broker", chainlinkAdapter.address, exchange.address);
+  // await globalConfig.addBroker(broker.address);
+  
 
   // Perpetual
-  let perpetual = await deploy<Perpetual__factory>("Perpetual", globalConfig.address, usdt.address, dev, usdt.decimals);
+  let perpetual = await deploy<Perpetual__factory>("Perpetual", globalConfig.address, usdt.address, dev, usdt.decimals, exchange.address);
 
   // Proxy
-  let proxy = await deploy<Proxy__factory>("Proxy", perpetual.address);
+  //let proxy = await deploy<Proxy__factory>("Proxy", perpetual.address);
 
   // Funding
-  let funding = await deploy<Funding__factory>(
-    "Funding",
-    globalConfig.address,
-    proxy.address,
-    chainlinkAdapter.address,
-  );
-
-  console.log("whitelist of perpetual");
-  await globalConfig.addComponent(perpetual.address, proxy.address);
-  await globalConfig.addComponent(perpetual.address, exchange.address);
-  await globalConfig.addComponent(perpetual.address, contractRreader.address);
-  await globalConfig.addComponent(perpetual.address, funding.address);
-
-  console.log("whitelist of funding");
-  await globalConfig.addComponent(funding.address, exchange.address);
-  await globalConfig.addComponent(funding.address, perpetual.address);
-
-  if (network.config.chainId !== 56) {
-    await globalConfig.addComponent(perpetual.address, deployer);
-    await globalConfig.addComponent(funding.address, deployer);
-  }
+  let funding = await deploy<Funding__factory>("Funding",globalConfig.address,perpetual.address,chainlinkAdapter.address,);
 
   console.log("Perpetual.setGovernanceAddress");
   const perpetualGovAddresses = {
@@ -140,7 +121,7 @@ export async function deployAll(): Promise<void> {
   console.log("Funding.setGovernanceParameter");
   const fundingGovSettings = {
     emaAlpha: "3327787021630616",
-    updatePremiumPrize: "0",
+    //updatePremiumPrize: "0",
     markPremiumLimit: "800000000000000",
     fundingDampener: "400000000000000",
     //accumulatedFundingPerContract:'0xxxx', //Emergency Only
@@ -153,15 +134,14 @@ export async function deployAll(): Promise<void> {
 
   // init funding
   await funding.initFunding();
-
   console.log("Perpetual.setGovernanceParameter");
   const perpetualGovSettings = {
     initialMarginRate: "40000000000000000",
     maintenanceMarginRate: "30000000000000000",
     liquidationPenaltyRate: "18000000000000000",
     penaltyFundRate: "12000000000000000",
-    takerDevFeeRate: "0",
-    makerDevFeeRate: "0",
+    //takerDevFeeRate: "0",
+    //makerDevFeeRate: "0",
     lotSize: "1000000000000000",
     tradingLotSize: "1000000000000000",
     referrerBonusRate: "300000000000000000",
