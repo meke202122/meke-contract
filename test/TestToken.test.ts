@@ -3,7 +3,14 @@ import hardhat from "hardhat";
 import { deploy } from "../scripts/deploy-utils";
 import { MyTestToken__factory } from "../typechain-ethers-v5";
 
+async function exec(action:()=>any){
+  console.log(action.toString());
+}
+
 describe("TestToken", () => {
+  test('funcTest',async()=>{
+    exec(()=>{console.log('kkk')});
+  });
   test("simpleTest", async () => {
     const { ethers } = hardhat;
 

@@ -47,10 +47,10 @@ const config: HardhatUserConfig = {
     hardhat: {
       accounts: hardhatAccounts,
     },
-    bscTestnet: {
-      url: `https://bsc-testnet.nodereal.io/v1/e9a36765eb8a40b9bd12e680a1fd2bc5/`,
-      chainId: 97,
-      accounts: [process.env.PRIVATE_KEY_BSC_TEST || ""],
+    opbnbTestnet: {
+      url: `https://opbnb-testnet-rpc.bnbchain.org`,
+      chainId: 5611,
+      accounts: [process.env.PRIVATE_KEY_OPBNB_TEST || ""],
     },
   },
 
