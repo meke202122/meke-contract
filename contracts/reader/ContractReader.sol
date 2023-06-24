@@ -14,7 +14,7 @@ contract ContractReader {
         address fundingModuleAddress; // funding module contract address
     }
 
-    struct PerpetualStorage {
+    struct PerpetualStorageData {
         address collateralTokenAddress;
         uint256 totalSize;
         int256 insuranceFundBalance;
@@ -34,7 +34,7 @@ contract ContractReader {
         int256 marginBalance;
         uint256 markPrice;
         uint256 maintenanceMargin;
-        PerpetualStorage perpetualStorage;
+        PerpetualStorageData perpetualStorage;
         LibTypes.MarginAccount marginAccount;
         int256 availableMargin;
     }
@@ -59,7 +59,7 @@ contract ContractReader {
         params.fundingModuleAddress = address(perpetual.fundingModule());
     }
 
-    function getPerpetualStorage(address perpetualAddress) public view returns (PerpetualStorage memory params) {
+    function getPerpetualStorage(address perpetualAddress) public view returns (PerpetualStorageData memory params) {
         IPerpetual perpetual = IPerpetual(perpetualAddress);
         params.collateralTokenAddress = address(perpetual.collateral());
 
