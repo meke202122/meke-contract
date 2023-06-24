@@ -14,7 +14,7 @@ contract MarginAccount is Collateral {
 
     event UpdatePositionAccount(
         address indexed trader,
-        LibTypes.MarginAccount account,
+        LibTypes.MarginAccountData account,
         uint256 perpetualTotalSize,
         uint256 price
     );
@@ -42,7 +42,7 @@ contract MarginAccount is Collateral {
         if (marginAccounts[trader].side == LibTypes.Side.FLAT || marginAccounts[trader].side == LibTypes.Side.EMPTY) {
             return 0;
         }
-        LibTypes.MarginAccount memory account = marginAccounts[trader];
+        LibTypes.MarginAccountData memory account = marginAccounts[trader];
         int256 liquidationAmount = account.cashBalance.add(account.entrySocialLoss);
         liquidationAmount = liquidationAmount.sub(marginWithPrice(trader, liquidationPrice).toInt256()).sub(
             socialLossPerContract(account.side).wmul(account.size.toInt256())
@@ -81,7 +81,7 @@ contract MarginAccount is Collateral {
      * @return PNL of given account.
      */
     function calculatePnl(
-        LibTypes.MarginAccount memory account,
+        LibTypes.MarginAccountData memory account,
         uint256 tradePrice,
         uint256 amount
     ) internal returns (int256) {
@@ -175,7 +175,7 @@ contract MarginAccount is Collateral {
      * @return Value of available margin balance.
      */
     function pnlWithPrice(address trader, uint256 markPrice) internal returns (int256) {
-        LibTypes.MarginAccount memory account = marginAccounts[trader];
+        LibTypes.MarginAccountData memory account = marginAccounts[trader];
         return calculatePnl(account, markPrice, account.size);
     }
 
@@ -188,11 +188,11 @@ contract MarginAccount is Collateral {
         totalSizes[uint256(side)] = totalSizes[uint256(side)].sub(amount);
     }
 
-    function socialLoss(LibTypes.MarginAccount memory account) internal view returns (int256) {
+    function socialLoss(LibTypes.MarginAccountData memory account) internal view returns (int256) {
         return socialLossWithAmount(account, account.size);
     }
 
-    function socialLossWithAmount(LibTypes.MarginAccount memory account, uint256 amount)
+    function socialLossWithAmount(LibTypes.MarginAccountData memory account, uint256 amount)
         internal
         view
         returns (int256)
@@ -214,11 +214,11 @@ contract MarginAccount is Collateral {
         return loss;
     }
 
-    function fundingLoss(LibTypes.MarginAccount memory account) internal returns (int256) {
+    function fundingLoss(LibTypes.MarginAccountData memory account) internal returns (int256) {
         return fundingLossWithAmount(account, account.size);
     }
 
-    function fundingLossWithAmount(LibTypes.MarginAccount memory account, uint256 amount) internal returns (int256) {
+    function fundingLossWithAmount(LibTypes.MarginAccountData memory account, uint256 amount) internal returns (int256) {
         if (account.side == LibTypes.Side.FLAT || account.side == LibTypes.Side.EMPTY) {
             return 0;
         }
@@ -245,7 +245,7 @@ contract MarginAccount is Collateral {
      * @param markPrice Price used in calculation.
      */
     function remargin(address trader, uint256 markPrice) internal {
-        LibTypes.MarginAccount storage account = marginAccounts[trader];
+        LibTypes.MarginAccountData storage account = marginAccounts[trader];
         // if (account.size == 0) {
         //     return;
         // }
@@ -269,7 +269,7 @@ contract MarginAccount is Collateral {
      * @param amount  Amount of position to open.
      */
     function open(
-        LibTypes.MarginAccount memory account,
+        LibTypes.MarginAccountData memory account,
         LibTypes.Side side,
         uint256 price,
         uint256 amount
@@ -311,7 +311,7 @@ contract MarginAccount is Collateral {
      * @param amount  Amount of position to close.
      */
     function close(
-        LibTypes.MarginAccount memory account,
+        LibTypes.MarginAccountData memory account,
         uint256 price,
         uint256 amount
     ) internal returns (int256) {
@@ -355,7 +355,7 @@ contract MarginAccount is Collateral {
         // int256 rpnl;
         uint256 opened = amount;
         uint256 closed;
-        LibTypes.MarginAccount memory account = marginAccounts[trader];
+        LibTypes.MarginAccountData memory account = marginAccounts[trader];
         LibTypes.Side originalSide = account.side;
         uint256 originalSize = account.size;
         if (account.side != LibTypes.Side.FLAT && account.side != LibTypes.Side.EMPTY && account.side != side) {
@@ -391,7 +391,7 @@ contract MarginAccount is Collateral {
         uint256 liquidationAmount
     ) internal returns (uint256, uint256) {
         // liquidiated trader
-        LibTypes.MarginAccount memory account = marginAccounts[trader];
+        LibTypes.MarginAccountData memory account = marginAccounts[trader];
         require(liquidationAmount <= account.size, "exceeded liquidation amount");
 
         LibTypes.Side liquidationSide = account.side;

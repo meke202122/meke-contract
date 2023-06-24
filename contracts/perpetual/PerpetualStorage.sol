@@ -44,7 +44,7 @@ contract PerpetualStorage {
     // Scaler helps to convert decimals
     int256 public scaler;
     // Mapping from owner to its margin account
-    mapping (address => LibTypes.MarginAccount) internal marginAccounts;
+    mapping (address => LibTypes.MarginAccountData) internal marginAccounts;
 
     // TODO: Should be UpdateSocialLoss but to compatible off-chain part
     event SocialLoss(LibTypes.Side side, int256 newVal);
@@ -94,10 +94,10 @@ contract PerpetualStorage {
      * @param trader   Address of the account owner.
      * @return Margin account data.
      */
-    function getMarginAccount(address trader) public view returns (LibTypes.MarginAccount memory) {
+    function getMarginAccount(address trader) public view returns (LibTypes.MarginAccountData memory) {
         // return marginAccounts[trader];
 
-        LibTypes.MarginAccount memory account= marginAccounts[trader];
+        LibTypes.MarginAccountData memory account= marginAccounts[trader];
         if (account.side == LibTypes.Side.EMPTY){
             account.size = account.size.sub(flatAmount);
             account.entryValue = account.entryValue.sub(flatAmount);

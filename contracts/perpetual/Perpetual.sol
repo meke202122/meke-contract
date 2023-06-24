@@ -509,7 +509,7 @@ contract Perpetual is MarginAccount, ReentrancyGuard {
     function settleImplementation(address trader) internal onlyNotPaused {
         require(status == LibTypes.Status.SETTLED, "wrong perpetual status");
         uint256 currentMarkPrice = markPrice();
-        LibTypes.MarginAccount memory account = marginAccounts[trader];
+        LibTypes.MarginAccountData memory account = marginAccounts[trader];
         // if (account.size == 0) {
         //     return;
         // }

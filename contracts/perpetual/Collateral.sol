@@ -68,7 +68,7 @@ contract Collateral is PerpetualGovernance {
         int256 wadAmount = pullCollateral(trader, rawAmount);
         marginAccounts[trader].cashBalance = marginAccounts[trader].cashBalance.add(wadAmount);
         if (marginAccounts[trader].side == LibTypes.Side.FLAT){
-            LibTypes.MarginAccount storage account = marginAccounts[trader];
+            LibTypes.MarginAccountData storage account = marginAccounts[trader];
             account.side = LibTypes.Side.EMPTY;
             account.size = flatAmount;
             account.entryValue = flatAmount;

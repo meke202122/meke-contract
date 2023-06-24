@@ -31,7 +31,7 @@ library LibTypes {
         int256 referrerBonusRate;
     }
 
-    struct MarginAccount {
+    struct MarginAccountData {
         LibTypes.Side side;
         uint256 size;
         uint256 entryValue;

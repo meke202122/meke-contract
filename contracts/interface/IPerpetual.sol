@@ -12,7 +12,7 @@ import "../lib/LibOrder.sol";
 interface IPerpetual {
     function devAddress() external view returns (address);
 
-    function getMarginAccount(address trader) external view returns (LibTypes.MarginAccount memory);
+    function getMarginAccount(address trader) external view returns (LibTypes.MarginAccountData memory);
 
     function getGovernance() external view returns (LibTypes.PerpGovernanceConfig memory);
 

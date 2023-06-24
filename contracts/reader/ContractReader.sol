@@ -35,14 +35,14 @@ contract ContractReader {
         uint256 markPrice;
         uint256 maintenanceMargin;
         PerpetualStorageData perpetualStorage;
-        LibTypes.MarginAccount marginAccount;
+        LibTypes.MarginAccountData marginAccount;
         int256 availableMargin;
     }
 
 
     struct LiquidateTrader {
         address trader;
-        LibTypes.MarginAccount marginAccount;
+        LibTypes.MarginAccountData marginAccount;
     }
 
     struct Market {
@@ -81,7 +81,7 @@ contract ContractReader {
     function getAccountStorage(address perpetualAddress, address trader)
         public
         view
-        returns (LibTypes.MarginAccount memory margin)
+        returns (LibTypes.MarginAccountData memory margin)
     {
         IPerpetual perpetual = IPerpetual(perpetualAddress);
         return perpetual.getMarginAccount(trader);
