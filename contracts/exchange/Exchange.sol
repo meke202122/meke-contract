@@ -484,9 +484,9 @@ contract Exchange {
             j /= 10;
         }
         bytes memory bstr = new bytes(len);
-        uint256 k = len - 1;
-        while (_i != 0) {
-            bstr[k--] = bytes1(uint8(48 + (_i % 10)));
+        while (len > 0) {
+            len--;
+            bstr[len] = bytes1(uint8(48 + (_i % 10)));
             _i /= 10;
         }
         return string(bstr);
