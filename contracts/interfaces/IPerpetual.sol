@@ -3,7 +3,7 @@
 pragma solidity ^0.8.12;
 pragma abicoder v2;
 
-import "../interface/IFunding.sol";
+import "../interfaces/IFunding.sol";
 
 import "../lib/LibTypes.sol";
 import "../lib/LibOrder.sol";

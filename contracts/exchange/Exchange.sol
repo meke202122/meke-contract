@@ -6,8 +6,8 @@ pragma abicoder v2;
 import "../lib/LibMath.sol";
 import "../lib/LibOrder.sol";
 import "../lib/LibSignature.sol";
-import "../interface/IGlobalConfig.sol";
-import "../interface/IPerpetual.sol";
+import "../interfaces/IGlobalConfig.sol";
+import "../interfaces/IPerpetual.sol";
 
 contract Exchange {
     using LibMathSigned for int256;

@@ -4,7 +4,7 @@
 pragma solidity ^0.8.12;
 pragma abicoder v2;
 
-import "../interface/IPerpetual.sol";
+import "../interfaces/IPerpetual.sol";
 
 contract TestSet{
     function set(address _perpetual,uint256 price) public {

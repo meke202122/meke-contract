@@ -6,8 +6,8 @@ pragma abicoder v2;
 import {LibMathSigned, LibMathUnsigned} from "../lib/LibMath.sol";
 
 import "../lib/LibTypes.sol";
-import "../interface/IPriceFeeder.sol";
-import "../interface/IPerpetual.sol";
+import "../interfaces/IPriceFeeder.sol";
+import "../interfaces/IPerpetual.sol";
 import "./FundingGovernance.sol";
 
 

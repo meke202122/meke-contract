@@ -4,8 +4,8 @@
 pragma solidity ^0.8.12;
 pragma abicoder v2;
 
-import "../interface/IPriceFeeder.sol";
-import "../interface/IExchange.sol";
+import "../interfaces/IPriceFeeder.sol";
+import "../interfaces/IExchange.sol";
 
 
 contract Broker{

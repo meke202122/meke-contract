@@ -5,7 +5,7 @@ pragma solidity ^0.8.12;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "../lib/LibMath.sol";
-import "../interface/IChainlinkFeeder.sol";
+import "../interfaces/IChainlinkFeeder.sol";
 
 contract ChainlinkAdapter is Ownable {
     using LibMathSigned for int256;

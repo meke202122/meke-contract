@@ -4,7 +4,7 @@ pragma solidity ^0.8.12;
 pragma abicoder v2;
 
 import "../lib/LibTypes.sol";
-import "../interface/IPerpetual.sol";
+import "../interfaces/IPerpetual.sol";
 
 
 interface IFunding {

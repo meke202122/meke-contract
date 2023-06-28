@@ -8,8 +8,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../lib/LibMath.sol";
 import "../lib/LibTypes.sol";
 
-import "../interface/IFunding.sol";
-import "../interface/IGlobalConfig.sol";
+import "../interfaces/IFunding.sol";
+import "../interfaces/IGlobalConfig.sol";
 
 
 contract PerpetualStorage {

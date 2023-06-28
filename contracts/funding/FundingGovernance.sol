@@ -7,9 +7,9 @@ import "@openzeppelin/contracts/utils/Address.sol";
 
 import {LibMathSigned, LibMathUnsigned} from "../lib/LibMath.sol";
 import "../lib/LibTypes.sol";
-import "../interface/IGlobalConfig.sol";
-import "../interface/IPriceFeeder.sol";
-import "../interface/IPerpetual.sol";
+import "../interfaces/IGlobalConfig.sol";
+import "../interfaces/IPriceFeeder.sol";
+import "../interfaces/IPerpetual.sol";
 
 
 contract FundingGovernance {

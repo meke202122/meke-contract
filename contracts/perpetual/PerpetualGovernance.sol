@@ -6,7 +6,7 @@ pragma abicoder v2;
 import "../lib/LibMath.sol";
 import "../lib/LibTypes.sol";
 import "./PerpetualStorage.sol";
-import "../interface/IGlobalConfig.sol";
+import "../interfaces/IGlobalConfig.sol";
 
 contract PerpetualGovernance is PerpetualStorage {
     using LibMathSigned for int256;
