@@ -1,7 +1,7 @@
 import { expect, test } from "@jest/globals";
 import hardhat from "hardhat";
 import { deploy } from "../scripts/deploy-utils";
-import { MyTestToken__factory } from "../typechain-ethers-v5";
+import { TestToken__factory } from '../typechain-ethers-v5/factories/contracts/test/TestToken.sol';
 
 async function exec(action:()=>any){
   console.log(action.toString());
@@ -19,9 +19,9 @@ describe("TestToken", () => {
 
     const decimals = 18;
     const unitOne = BigInt(10) ** BigInt(decimals);
-    const totalSupply = BigInt(100000000) * unitOne;
+    const totalSupply = BigInt(10) * unitOne;
 
-    const testToken = await deploy<MyTestToken__factory>('MyTestToken', "TestU", "TestU", decimals);
+    const testToken = await deploy<TestToken__factory>('TestToken', "TestU", "TestU");
 
     expect(await testToken.decimals()).toBe(decimals);
     expect((await testToken.totalSupply()).toBigInt()).toBe(totalSupply);
@@ -42,5 +42,6 @@ describe("TestToken", () => {
     expect((await testToken.balanceOf(receiver1)).toBigInt()).toBe(amount * BigInt(2));
     expect((await testToken.balanceOf(deployer)).toBigInt()).toBe(totalSupply - amount);
     expect((await testToken.totalSupply()).toBigInt()).toBe(totalSupply + amount);
+    console.log('---finished--')
   }, 30_000);
 });

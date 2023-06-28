@@ -6,8 +6,14 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract TestToken is ERC20, Ownable {
-    constructor(string memory name, string memory symbol) ERC20(name, symbol) {
+    uint8 internal _dec=18;
+    constructor(string memory name, string memory symbol, uint8 _decimals) ERC20(name, symbol) {
+        _dec = _decimals;
         _mint(msg.sender, 1e19);
+    }
+
+    function decimals() public view override returns(uint8){
+        return _dec;
     }
 
     function mint(address to, uint256 amount) external onlyOwner {
