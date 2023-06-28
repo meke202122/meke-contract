@@ -1,17 +1,15 @@
 import hardhat from "hardhat";
 import { delay, deploy, execTx, isTestnet } from "../scripts/deploy-utils";
 import {
-  Broker__factory,
   ChainlinkAdapter,
   ChainlinkAdapter__factory,
   ContractReader__factory,
   Exchange__factory,
   Funding__factory,
   GlobalConfig__factory,
-  MyTestToken__factory,
   Perpetual__factory,
   PriceFeeder__factory,
-  Proxy__factory,
+  TestToken__factory,
 } from "../typechain-ethers-v5";
 
 export async function deployChainLinkAdapter(usdtDecimals: number) {
@@ -35,7 +33,7 @@ export async function deployChainLinkAdapter(usdtDecimals: number) {
     default:
       const mockPriceFeeder = await deploy<PriceFeeder__factory>("PriceFeeder");
       const oneUsdt = BigInt(10) ** BigInt(usdtDecimals);
-      ///await execTx((...args) => mockPriceFeeder.setPrice(...args), "mockPriceFeeder.setPrice", BigInt(1763) * oneUsdt);
+      await execTx((...args) => mockPriceFeeder.setPrice(...args), "mockPriceFeeder.setPrice", BigInt(1763) * oneUsdt);
       return mockPriceFeeder as unknown as ChainlinkAdapter;
   }
   return deploy<ChainlinkAdapter__factory>("ChainlinkAdapter", priceFeeder.address, priceFeeder.priceTimeout, false);
@@ -48,7 +46,7 @@ export async function deployUsdt() {
   const usdt = {
     chainId,
     address: "Invalid Address", //todo
-    name: "BNB_USDT",
+    name: "USDT",
     symbol: "USDT",
     decimals: 18,
   };
@@ -58,7 +56,7 @@ export async function deployUsdt() {
       usdt.address = "0x55d398326f99059fF775485246999027B3197955";
       break;
     default:
-      let testToken = await deploy<MyTestToken__factory>("MyTestToken", usdt.name, usdt.symbol, usdt.decimals);
+      let testToken = await deploy<TestToken__factory>("TestToken", usdt.name, usdt.symbol, usdt.decimals);
       usdt.address = testToken.address;
   }
   return usdt;
@@ -82,7 +80,7 @@ export async function deployAll(): Promise<void> {
   let globalConfig = await deploy<GlobalConfig__factory>("GlobalConfig");
 
   // Exchange
-  let exchange = await deploy<Exchange__factory>("Exchange", globalConfig.address,{gasLimit:12487815});
+  let exchange = await deploy<Exchange__factory>("Exchange", globalConfig.address);
 
   // USDT
   const usdt = await deployUsdt();
@@ -90,41 +88,41 @@ export async function deployAll(): Promise<void> {
   // ChainlinkAdapter
   const chainlinkAdapter = await deployChainLinkAdapter(usdt.decimals);
 
-  ///await execTx((...args)=>globalConfig.addBroker(...args),'globalConfig.addBroker',deployer);
+  await execTx((...args)=>globalConfig.addBroker(...args),'globalConfig.addBroker',deployer);
 
   // Perpetual
   let perpetual = await deploy<Perpetual__factory>("Perpetual", globalConfig.address, usdt.address, dev, usdt.decimals);
-  ///await execTx((...args) => globalConfig.addCaller(...args), "globalConfig.addCaller", perpetual.address);
+  await execTx((...args) => globalConfig.addCaller(...args), "globalConfig.addCaller", perpetual.address);
 
   // Funding
   let funding = await deploy<Funding__factory>("Funding", globalConfig.address, perpetual.address, chainlinkAdapter.address);
-  ///await execTx((...args) => globalConfig.addCaller(...args), "globalConfig.addCaller", funding.address);
+  await execTx((...args) => globalConfig.addCaller(...args), "globalConfig.addCaller", funding.address);
 
   console.log("whitelist of exchange");
-  ///await execTx((...args)=>globalConfig.addComponent(...args),'globalConfig.addComponent',exchange.address, perpetual.address);
+  await execTx((...args)=>globalConfig.addComponent(...args),'globalConfig.addComponent',exchange.address, perpetual.address);
 
   console.log("whitelist of perpetual");
-  ///await execTx((...args)=>globalConfig.addComponent(...args),'globalConfig.addComponent',perpetual.address, exchange.address);
-  ///await execTx((...args)=>globalConfig.addComponent(...args),'globalConfig.addComponent',perpetual.address, contractRreader.address);
-  ///await execTx((...args)=>globalConfig.addComponent(...args),'globalConfig.addComponent',perpetual.address, funding.address);
+  await execTx((...args)=>globalConfig.addComponent(...args),'globalConfig.addComponent',perpetual.address, exchange.address);
+  await execTx((...args)=>globalConfig.addComponent(...args),'globalConfig.addComponent',perpetual.address, contractRreader.address);
+  await execTx((...args)=>globalConfig.addComponent(...args),'globalConfig.addComponent',perpetual.address, funding.address);
 
   console.log("whitelist of funding");
-  ///await execTx((...args)=>globalConfig.addComponent(...args),'globalConfig.addComponent',funding.address, exchange.address);
-  ///await execTx((...args)=>globalConfig.addComponent(...args),'globalConfig.addComponent',funding.address, perpetual.address);
+  await execTx((...args)=>globalConfig.addComponent(...args),'globalConfig.addComponent',funding.address, exchange.address);
+  await execTx((...args)=>globalConfig.addComponent(...args),'globalConfig.addComponent',funding.address, perpetual.address);
 
   if (isTestnet(chainId)) {
-    ///await execTx((...args)=>globalConfig.addComponent(...args),'globalConfig.addComponent',perpetual.address, deployer);
-    ///await execTx((...args)=>globalConfig.addComponent(...args),'globalConfig.addComponent',funding.address, deployer);
+    await execTx((...args)=>globalConfig.addComponent(...args),'globalConfig.addComponent',perpetual.address, deployer);
+    await execTx((...args)=>globalConfig.addComponent(...args),'globalConfig.addComponent',funding.address, deployer);
   }
 
   const [price] = await chainlinkAdapter.price();
-  ///await execTx((...args) => funding.setFairPrice(...args), "funding.setFairPrice", price);
+  await execTx((...args) => funding.setFairPrice(...args), "funding.setFairPrice", price);
 
   console.log("Perpetual.setGovernanceAddress");
   const perpetualGovAddresses: Record<string, string> = {
     // globalConfig: globalConfig.address,
     // dev: deployer,
-    ///fundingModule: funding.address,
+    fundingModule: funding.address,
   };
   for (let [key, address] of Object.entries(perpetualGovAddresses)) {
     await execTx(
@@ -138,10 +136,10 @@ export async function deployAll(): Promise<void> {
 
   console.log("Funding.setGovernanceParameter");
   const fundingGovSettings: Record<string, string> = {
-    ///emaAlpha: "3327787021630616",
+    emaAlpha: "3327787021630616",
     //updatePremiumPrize: "0",
     markPremiumLimit: "800000000000000",
-    ///fundingDampener: "400000000000000",
+    fundingDampener: "400000000000000",
     //accumulatedFundingPerContract:'0xxxx', //Emergency Only
     //priceFeeder: chainlinkAdapter.address,
   };
@@ -150,19 +148,19 @@ export async function deployAll(): Promise<void> {
     await execTx((k,v, ...args)=>funding.setGovernanceParameter(ethers.utils.formatBytes32String(k), BigInt(v + ""),...args),'funding.setGovernanceParameter',key,value);
   }
 
-  ///await execTx((...args) => funding.initFunding(...args), "funding.initFunding");
+  await execTx((...args) => funding.initFunding(...args), "funding.initFunding");
 
   console.log("Perpetual.setGovernanceParameter");
   const perpetualGovSettings: Record<string, string> = {
-    ///initialMarginRate: "40000000000000000", //0.04
-    ///maintenanceMarginRate: "30000000000000000", //0.03
-    ///liquidationPenaltyRate: "18000000000000000", //0.018
-    ///penaltyFundRate: "12000000000000000", //0.012
+    initialMarginRate: "40000000000000000", //0.04
+    maintenanceMarginRate: "30000000000000000", //0.03
+    liquidationPenaltyRate: "18000000000000000", //0.018
+    penaltyFundRate: "12000000000000000", //0.012
     //takerDevFeeRate: "0",
     //makerDevFeeRate: "0",
-    ///lotSize: "1000000000000000", //0.001
-    ////tradingLotSize: "1000000000000000", //0.001
-    ///referrerBonusRate: "300000000000000000", //0.3
+    lotSize: "1000000000000000", //0.001
+    tradingLotSize: "1000000000000000", //0.001
+    referrerBonusRate: "300000000000000000", //0.3
     //longSocialLossPerContracts: '0xxxx', //Emergency Only
     //shortSocialLossPerContracts: '0xxxx' //Emergency Only
   };
