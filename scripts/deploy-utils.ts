@@ -96,8 +96,6 @@ export async function execTx<T extends any[]=[]>(action: (...args:T) => Promise<
   title ||=action.toString();
   console.log(title,...args);
   try{
-    const gasPrice = (await hardhat.ethers.getDefaultProvider().getGasPrice()).toBigInt();
-    args.push({gasPrice})
     const tx = await action(...args);
     console.log(`${title} tx:`, tx.hash)
     const receipt= await tx.wait(1).catch(err=>({transctionHash: tx.hash, blockNumber: tx.blockNumber, status: 0, error: err.message}));
