@@ -48,8 +48,13 @@ const config: HardhatUserConfig = {
       accounts: hardhatAccounts,
     },
     opbnbTestnet: {
-      url: `https://opbnb-testnet.meke.io/`,
+      url: `https://opbnb-testnet-rpc.bnbchain.org/`,
       chainId: 5611,
+      accounts: [process.env.PRIVATE_KEY_OPBNB_TEST || ""],
+    },
+    opbnbMainnet: {
+      url: `https://opbnb-mainnet-rpc.bnbchain.org`,
+      chainId: 204,
       accounts: [process.env.PRIVATE_KEY_OPBNB_TEST || ""],
     },
   },

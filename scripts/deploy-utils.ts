@@ -8,7 +8,7 @@ export function isSupportVerify(chainId: number) {
 }
 
 export function isTestnet(chainId: number) {
-  return ![56].includes(chainId);
+  return ![56, 204].includes(chainId);
 }
 
 export interface Deployment {

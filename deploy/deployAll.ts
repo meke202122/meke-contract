@@ -30,6 +30,8 @@ export async function deployChainLinkAdapter(usdtDecimals: number) {
     case 97:
       priceFeeder.address = "0x143db3CEEfbdfe5631aDD3E50f7614B6ba708BA7";
       break;
+    case 204:
+      priceFeeder.address = "0x2cAE4a97fC8AB1BD2703b56231ED662Cc4E76133";
     default:
       const mockPriceFeeder = await deploy<PriceFeeder__factory>("PriceFeeder");
       const oneUsdt = BigInt(10) ** BigInt(usdtDecimals);
@@ -54,6 +56,9 @@ export async function deployUsdt() {
   switch (chainId) {
     case 56:
       usdt.address = "0x55d398326f99059fF775485246999027B3197955";
+      break;
+    case 204:
+      usdt.address = "0x9e5AAC1Ba1a2e6aEd6b32689DFcF62A509Ca96f3";
       break;
     default:
       let testToken = await deploy<TestToken__factory>("TestToken", usdt.name, usdt.symbol, usdt.decimals);
@@ -88,7 +93,10 @@ export async function deployAll(): Promise<void> {
   // ChainlinkAdapter
   const chainlinkAdapter = await deployChainLinkAdapter(usdt.decimals);
 
-  await execTx((...args)=>globalConfig.addBroker(...args),'globalConfig.addBroker',deployer);
+  const brokers=[deployer];
+  for(var i=0;i<brokers.length;i++){
+    await execTx((...args) => globalConfig.addBroker(...args), "globalConfig.addBroker", brokers[i]);
+  }
 
   // Perpetual
   let perpetual = await deploy<Perpetual__factory>("Perpetual", globalConfig.address, usdt.address, dev, usdt.decimals);
@@ -138,8 +146,8 @@ export async function deployAll(): Promise<void> {
   const fundingGovSettings: Record<string, string> = {
     emaAlpha: "3327787021630616",
     //updatePremiumPrize: "0",
-    markPremiumLimit: "800000000000000",
-    fundingDampener: "400000000000000",
+    markPremiumLimit: "800000000000000",//0.0008
+    fundingDampener: "400000000000000",//0.0004
     //accumulatedFundingPerContract:'0xxxx', //Emergency Only
     //priceFeeder: chainlinkAdapter.address,
   };
@@ -152,15 +160,15 @@ export async function deployAll(): Promise<void> {
 
   console.log("Perpetual.setGovernanceParameter");
   const perpetualGovSettings: Record<string, string> = {
-    initialMarginRate: "40000000000000000", //0.04
-    maintenanceMarginRate: "30000000000000000", //0.03
-    liquidationPenaltyRate: "18000000000000000", //0.018
-    penaltyFundRate: "12000000000000000", //0.012
+    initialMarginRate: "40000000000000000", //0.04 => 4%
+    maintenanceMarginRate: "30000000000000000", //0.03 => 3%
+    liquidationPenaltyRate: "18000000000000000", //0.018 => 1.8%
+    penaltyFundRate: "12000000000000000", //0.012 => 1.2%
     //takerDevFeeRate: "0",
     //makerDevFeeRate: "0",
     lotSize: "1000000000000000", //0.001
     tradingLotSize: "1000000000000000", //0.001
-    referrerBonusRate: "300000000000000000", //0.3
+    referrerBonusRate: "300000000000000000", //0.3  =>30%
     //longSocialLossPerContracts: '0xxxx', //Emergency Only
     //shortSocialLossPerContracts: '0xxxx' //Emergency Only
   };
@@ -173,7 +181,7 @@ export async function deployAll(): Promise<void> {
       value,
     );
   }
-
+  
   console.log("-----finished---");
 }
 
