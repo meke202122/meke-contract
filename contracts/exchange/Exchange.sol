@@ -42,7 +42,7 @@ contract Exchange {
     );
     event Cancel(bytes32 indexed orderHash);
     event ActivateReferral(address indexed referrer, address indexed referree);
-    event ClaimReferralBonus(address indexed referrer, uint256, int256);
+    event ClaimReferralBonus(address indexed referrer, uint256 timestamp, int256 bonus);
 
     constructor(address _globalConfig) {
         globalConfig = IGlobalConfig(_globalConfig);
