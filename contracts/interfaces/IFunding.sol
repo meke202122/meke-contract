@@ -4,7 +4,7 @@ pragma solidity ^0.8.12;
 pragma abicoder v2;
 
 import "../lib/LibTypes.sol";
-import "../interfaces/IPerpetual.sol";
+//import "../interfaces/IPerpetual.sol";
 
 
 interface IFunding {
@@ -20,7 +20,7 @@ interface IFunding {
 
     function getGovernance() external view returns (LibTypes.FundingGovernanceConfig memory);
 
-    function perpetualProxy() external view returns (IPerpetual);
+    function perpetualProxy() external view returns (address);
 
     function currentMarkPrice() external returns (uint256);
 
