@@ -77,8 +77,12 @@ export async function deploy<T extends ContractFactory>(name: string, ...args: P
     }
   }
 
-  const gasPrice=(await factory.signer.provider!.getGasPrice()).toBigInt()
-  const contract = await factory.deploy(...args,{gasPrice: gasPrice + (gasPrice>>BigInt(2))});
+  let gasPrice=(await factory.signer.provider!.getGasPrice()).toBigInt()
+  if (network.config.chainId == 204 || network.config.chainId == 5611) {
+    gasPrice = BigInt(1024);
+  }
+  
+  const contract = await factory.deploy(...args,{gasPrice});
   const receipt = await contract.deployTransaction.wait(1);
   console.log(`deployed ${name} at ${contract.address} on ${hardhat.network.name}[${hardhat.network.config.chainId}]`);
   showReceipt(receipt);
@@ -94,8 +98,14 @@ export async function deploy<T extends ContractFactory>(name: string, ...args: P
 
 export async function execTx<T extends any[]=[]>(action: (...args:T) => Promise<ContractTransaction>, title:string='', ...args:T) {
   title ||=action.toString();
+
+  if ((network.config.chainId == 204 || network.config.chainId == 5611) && !args.at(-1)?.gasPrice){
+     args.push({ gasPrice: 1024 });
+  }
+
   console.log(title,...args);
   try{
+
     const tx = await action(...args);
     console.log(`${title} tx:`, tx.hash)
     const receipt= await tx.wait(1).catch(err=>({transctionHash: tx.hash, blockNumber: tx.blockNumber, status: 0, error: err.message}));
